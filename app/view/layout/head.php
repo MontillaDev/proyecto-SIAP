@@ -11,7 +11,6 @@ $pageTitle = isset($pageTitle) ? $pageTitle . ' — SIAP' : 'SIAP';
     <link rel="stylesheet" href="assets/css/siap.css?v=<?php echo file_exists('assets/css/siap.css') ? filemtime('assets/css/siap.css') : time(); ?>">
     <link rel="stylesheet" href="assets/js/DataTables/datatables.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
-    <link rel="icon" href="assets/img/SIAPpequeño.png" type="image/png">
 </head>
 <body>
 <div class="app-layout">
