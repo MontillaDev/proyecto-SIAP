@@ -59,6 +59,20 @@ body {
 }
 a { text-decoration: none; color: inherit; }
 
+::-webkit-scrollbar-thumb{
+  background: var(--navy);
+  border-radius: 12px;
+  border: 3px solid white;
+}
+
+::-webkit-scrollbar-track{
+  background: black;
+}
+
+::-webkit-scrollbar{
+  width: 12 px;
+}
+
 /* ============================================================
   LOGIN PAGE
    ============================================================ */
@@ -297,11 +311,17 @@ a { text-decoration: none; color: inherit; }
 
 .sidebar-brand-logo {
   margin-bottom: 8px;
+
 }
 .sidebar-brand-logo img {
   display: block;
+<<<<<<< HEAD
   width:75px;
   height:75px;
+=======
+  width:90px;
+  height:90px;
+>>>>>>> 24d04ecdb078ca2c325790d0747db8fd4efd4b74
   object-fit:contain;
 }
 .sidebar-brand-eyebrow {
@@ -647,7 +667,7 @@ a { text-decoration: none; color: inherit; }
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
-  overflow: hidden;
+  overflow-x: hidden;
 }
 .card-header {
   padding: 18px 24px;

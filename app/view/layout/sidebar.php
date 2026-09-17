@@ -15,7 +15,11 @@ if (!function_exists('sidebarLink')) {
 <aside class="sidebar">
     <div class="sidebar-brand">
         <div class="sidebar-brand-logo">
+<<<<<<< HEAD
             <img src="assets/img/SIAPlogo.png" alt="SIAP" >
+=======
+            <img src="assets/img/SIAPlogo.png" alt="SIAP">
+>>>>>>> 24d04ecdb078ca2c325790d0747db8fd4efd4b74
         </div>
         <div class="sidebar-brand-eyebrow">SIAP &bull; UPTAEB</div>
         <div class="sidebar-brand-name">Portal de Planificaci&oacute;n</div>
