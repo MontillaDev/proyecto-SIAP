@@ -315,13 +315,8 @@ a { text-decoration: none; color: inherit; }
 }
 .sidebar-brand-logo img {
   display: block;
-<<<<<<< HEAD
-  width:75px;
-  height:75px;
-=======
   width:90px;
   height:90px;
->>>>>>> 24d04ecdb078ca2c325790d0747db8fd4efd4b74
   object-fit:contain;
 }
 .sidebar-brand-eyebrow {
