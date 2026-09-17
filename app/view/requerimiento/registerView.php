@@ -37,7 +37,7 @@ include_once 'app/view/layout/head.php';
                 <input type="hidden" id="id_req" name="id_req" value="<?php echo $idReq; ?>">
                 <input type="hidden" id="partida_actual" name="partida_actual" value="401">
 
-                <div class="table-wrap">
+                <div class="table-wrapper">
                     <table id="tabla-registro" class="siap-table">
                         <thead class="table-dark">
                             <tr>

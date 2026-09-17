@@ -6,7 +6,7 @@ $esAdmin = isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador';
 if (!function_exists('sidebarLink')) {
     function sidebarLink($url, $icon, $label, $urlActual) {
         $active = ($urlActual === $url) ? 'active' : '';
-        echo "<a href='?url={$url}&type=main' class='sidebar-link {$active}'>";
+        echo "<a href='?url={$url}&type=main' class='sidebar-link {$active}' data-nav='1'>";
         echo "<span class='icon'>{$icon}</span> <span class='sidebar-link-label'>{$label}</span>";
         echo "</a>";
     }
@@ -15,7 +15,7 @@ if (!function_exists('sidebarLink')) {
 <aside class="sidebar">
     <div class="sidebar-brand">
         <div class="sidebar-brand-logo">
-            <img src="assets/img/SIAPlogo.png" alt="SIAP" style="width:48px;height:48px;object-fit:contain;">
+            <img src="assets/img/SIAPlogo.png" alt="SIAP" >
         </div>
         <div class="sidebar-brand-eyebrow">SIAP &bull; UPTAEB</div>
         <div class="sidebar-brand-name">Portal de Planificaci&oacute;n</div>
@@ -37,6 +37,7 @@ if (!function_exists('sidebarLink')) {
         <?php else: ?>
             <div class="sidebar-section-title">Mi &Aacute;rea</div>
             <?php sidebarLink('requerimiento',       '&#128203;', 'Mi Requerimiento',           $urlActual); ?>
+            <?php sidebarLink('reporte',             '&#128202;', 'Informes',                   $urlActual); ?>
         <?php endif; ?>
 
         <!-- Botón Salir: destruye sesión y redirige al login -->

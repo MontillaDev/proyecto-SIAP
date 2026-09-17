@@ -1,12 +1,12 @@
 ﻿<?php
-$pageTitle = "Registrar â€” Tasa BCV";
+$pageTitle = "Registrar Tasa BCV";
 $jsFile    = "tasaBCV.js";
 include_once 'app/view/layout/head.php';
 ?>
 
 <!-- TOPBAR -->
 <div class="topbar">
-    <div class="topbar-title">ðŸ’² Registrar Tasa BCV</div>
+    <div class="topbar-title">Registrar Tasa BCV</div>
     <div class="topbar-actions">
         <a href="?url=tasaBCV&type=main" class="btn btn-outline btn-sm">&#8592; Volver</a>
     </div>

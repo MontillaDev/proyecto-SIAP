@@ -72,7 +72,7 @@ $dependencias  = isset($dependencias) ? $dependencias : [];
             <span class="badge badge-blue"><?php echo count($result); ?> registros</span>
         </div>
         <div class="card-body">
-            <div class="table-wrap">
+            <div class="table-wrapper">
                 <table class="siap-table" style="width:100%;font-size:12.5px;">
                     <thead>
                         <tr>

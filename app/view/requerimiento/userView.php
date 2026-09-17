@@ -16,7 +16,7 @@ include_once 'app/view/layout/head.php';
 <!-- si no es administrador y no se ha hecho un requerimiento antes en ese año activo, entonces se habilita -->
 <!-- el boton de registro -->
 <div class="topbar">
-    <div class="topbar-title">&#128203; Requerimientos</div>
+    <div class="topbar-title">Requerimientos</div>
     <div class="topbar-actions">
         <?php if((($_SESSION['rol'] ?? '') !== "Administrador") && !empty($prevReq) && !empty($perAct)){?>
         <a href="?url=requerimiento&type=register"  class="btn btn-success btn-sm">&#43; Registrar</a>
@@ -72,7 +72,7 @@ if (isset($timeLeft) && is_array($timeLeft) && $timeLeft[2] === false) {
         </div>
         </div>
         <div class="card-body">
-            <div class="table-wrap">
+            <div class="table-wrapper">
             <input type="hidden" id="id_req" name="id_req" value="<?php echo $idReq; ?>">
             <!-- class="siap-table" esta clase que va dentro de la tabla oculta los datos totales del footer. hay que acomodarlo-->
                 <table id="tablaMain" >

@@ -17,7 +17,7 @@ include_once 'app/view/layout/head.php';
             <span class="card-title">Periodos</span>
         </div>
         <div class="card-body">
-            <div class="table-wrap">
+            <div class="table-wrapper">
                 <table id="tablaMain" class="siap-table" style="width:100%">
                     <thead><tr><th>ID</th><th>Año Fiscal</th><th>Fecha Inicio</th><th>Fecha Fin</th><th>Estado</th><th>Acciones</th></tr></thead>
                     <tbody></tbody>

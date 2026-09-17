@@ -34,8 +34,8 @@ $(document).ready(function() {
       },
       { data: null, render: (d) => {
           return `
-            <button value="${d.id_prod}" class="btn btn-sm btn-modificar text-white" style="margin-right:6px; background-color:#5bc0de; border-color:#46b8da;">✏️</button>
-            <button value="${d.id_prod}" class="btn btn-danger btn-sm btn-eliminar" aria-label="Inhabilitar">🗑️</button>
+            <button value="${d.id_prod}" class="btn btn-sm btn-modificar text-white" style="margin-right:6px; background-color:#5bc0de; border-color:#46b8da;" aria-label="Editar"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+            <button value="${d.id_prod}" class="btn btn-danger btn-sm btn-eliminar" aria-label="Eliminar"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
           `;
         }
       }

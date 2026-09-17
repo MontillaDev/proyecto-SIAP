@@ -26,7 +26,7 @@ include_once 'app/view/layout/head.php';
                 </div>
                 <button id="btnAgregarContacto" class="btn btn-success btn-sm" style="margin-top:10px;">Agregar</button>
             </div>
-            <div class="table-wrap" style="margin-top:20px;">
+            <div class="table-wrapper" style="margin-top:20px;">
                 <table id="tablaContactos" class="siap-table" style="width:100%">
                     <thead><tr><th>ID</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead>
                     <tbody></tbody>

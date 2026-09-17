@@ -100,12 +100,11 @@ class requerimientoModel extends ConnectDB {
         $partida = isset($_POST['partida']) ? $_POST['partida'] : '401';
         //cada numero es pintado con un mes para la selecion de la cantidad en la tabla
         $query = "SELECT pro.id_prod, pro.nom_prod, 
-                  0 as ene, 0 as feb, 0 as mar, 0 as abr, 0 as may, 0 as jun,
-                  0 as jul, 0 as ago, 0 as sep, 0 as oct, 0 as nov, 0 as dic
-                  FROM productos pro
-                  JOIN partidas p ON pro.id_partida = p.id_partida
-                  WHERE p.cod_partida = ? AND pro.estado = 1";
-                  
+                0 as ene, 0 as feb, 0 as mar, 0 as abr, 0 as may, 0 as jun,
+                0 as jul, 0 as ago, 0 as sep, 0 as oct, 0 as nov, 0 as dic
+                FROM productos pro
+                JOIN partidas p ON pro.id_partida = p.id_partida
+                WHERE p.cod_partida = ? AND pro.estado = 1";
         $stmt = $this->conex->prepare($query);
         //cada consulta a los productos se divide por partidad presupuestaria
         $stmt->bindValue(1 , $partida, \PDO::PARAM_STR);
@@ -153,10 +152,9 @@ class requerimientoModel extends ConnectDB {
 
     private function executeVerifyPreviusReq($idDep) {
         $query = "SELECT COUNT(*) as total 
-                  FROM requerimientos r
-                  JOIN anio_fiscal af ON r.id_aniof = af.id_aniof
-                  WHERE r.id_dep = :id_dep AND af.activo = 1 AND r.estado = 1";
-                  
+                FROM requerimientos r
+                JOIN anio_fiscal af ON r.id_aniof = af.id_aniof
+                WHERE r.id_dep = :id_dep AND af.activo = 1 AND r.estado = 1";
         $stmt = $this->conex->prepare($query);
         $stmt->bindValue(':id_dep', $idDep, \PDO::PARAM_INT);
         $stmt->execute();
@@ -224,9 +222,9 @@ class requerimientoModel extends ConnectDB {
         $estadoEnv = ($rol === 'Administrador') ? 1 : 0;
 
         $stmtCheck = $this->conex->prepare("SELECT r.id_req 
-              FROM requerimientos r
-              JOIN anio_fiscal af ON r.id_aniof = af.id_aniof
-              WHERE r.id_dep = ? AND r.estado = 1 AND r.estado_envio = ? AND af.activo = 1");
+            FROM requerimientos r
+            JOIN anio_fiscal af ON r.id_aniof = af.id_aniof
+            WHERE r.id_dep = ? AND r.estado = 1 AND r.estado_envio = ? AND af.activo = 1");
         $stmtCheck->execute([(int)$idDepFiltrar,(int)$estadoEnv]);
         $reqExistente = $stmtCheck->fetch(\PDO::FETCH_ASSOC);
         
@@ -304,7 +302,7 @@ class requerimientoModel extends ConnectDB {
         $id_aniof = $this->getActiveAnioFiscalId();
 
         $qReq = "INSERT INTO requerimientos (id_dep, id_tasa, id_aniof, estado_envio, fecha_env, estado) 
-                 VALUES (:id_dep, :id_tasa, :id_aniof, 0, NOW(), 0)";
+                VALUES (:id_dep, :id_tasa, :id_aniof, 0, NOW(), 0)";
         $sReq = $this->conex->prepare($qReq);
         $sReq->execute([
             ':id_dep' => $this->idDepAct,
@@ -320,7 +318,7 @@ class requerimientoModel extends ConnectDB {
         $sDel = $this->conex->prepare($qDel);
 
         $qIns = "INSERT INTO detalle_req (id_prod, id_req, mes, cant_mes) 
-                 VALUES (:id_prod, :id_req, :mes, :cant_mes)";
+                VALUES (:id_prod, :id_req, :mes, :cant_mes)";
         $sIns = $this->conex->prepare($qIns);
 
         foreach ($cantidades as $idProd => $meses) {
@@ -367,9 +365,9 @@ class requerimientoModel extends ConnectDB {
 
     private function getActivePeriod() {
         $query = "SELECT per_inicio, per_fin 
-                  FROM periodos_entrega pe
-                  JOIN anio_fiscal af ON pe.id_aniof = af.id_aniof
-                  WHERE pe.activo = 1 AND af.activo = 1 LIMIT 1";
+                FROM periodos_entrega pe
+                JOIN anio_fiscal af ON pe.id_aniof = af.id_aniof
+                WHERE pe.activo = 1 AND af.activo = 1 LIMIT 1";
         $stmt = $this->conex->prepare($query);
         $stmt->execute();
         return $stmt->fetch(\PDO::FETCH_ASSOC);

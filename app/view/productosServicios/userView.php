@@ -34,7 +34,7 @@ include_once 'app/view/layout/head.php';
                 <div class="alert-banner-sub">No se encontraron partidas activas para 401, 402, 403, 404 o 407.</div>
             <?php endif; ?>
 
-            <div class="table-wrap">
+            <div class="table-wrapper">
                 <table id="tablaMain" class="siap-table" style="width:100%">
                     <thead>
                     <tr>

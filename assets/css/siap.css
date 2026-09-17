@@ -55,7 +55,7 @@ body {
   color: var(--text-dark);
   background: var(--bg);
   line-height: 1.5;
-  overflow-x: hidden;
+  overflow-x: visible;
 }
 a { text-decoration: none; color: inherit; }
 
@@ -268,7 +268,6 @@ a { text-decoration: none; color: inherit; }
    MAIN LAYOUT (sidebar + content)
    ============================================================ */
 .app-layout {
-  display: flex;
   min-height: 100vh;
 }
 
@@ -301,9 +300,12 @@ a { text-decoration: none; color: inherit; }
 }
 .sidebar-brand-logo img {
   display: block;
+  width:75px;
+  height:75px;
+  object-fit:contain;
 }
 .sidebar-brand-eyebrow {
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -316,7 +318,7 @@ a { text-decoration: none; color: inherit; }
   color: var(--white);
 }
 .sidebar-brand-sub {
-  font-size: 11px;
+  font-size: 13px;
   color: rgba(255,255,255,.35);
   margin-top: 2px;
 }
@@ -516,6 +518,7 @@ a { text-decoration: none; color: inherit; }
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  transition: margin-left .22s ease;
 }
 
 .topbar {
@@ -670,6 +673,12 @@ a { text-decoration: none; color: inherit; }
 .info-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
 
 /* ─── TABLES ─────────────────────────────────────────────────── */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .table-wrap { overflow-x: auto; }
 table.siap-table {
   width: 100%;

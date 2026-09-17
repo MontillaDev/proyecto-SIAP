@@ -9,7 +9,8 @@
     document.addEventListener('DOMContentLoaded', function() {
         var toggleBtn = document.getElementById('sidebarToggleBtn');
         if (!toggleBtn) return;
-    toggleBtn.addEventListener('click', function() {
+    toggleBtn.addEventListener('click', function(e) {
+            if (e && e.target && e.target.closest('.sidebar-link[data-nav="1"]')) return;
             var appLayout = document.querySelector('.app-layout');
             if (!appLayout) return;
 

@@ -86,14 +86,14 @@ body{
   font-size:26px;
   font-weight:700;
   color:#0a0a0a;
-  text-align:left;
+  text-align:center;
 }
 .welcome-subtitle{
   margin:0 0 16px;
   font-size:13px;
   color:var(--text-gray-2);
   font-weight:400;
-  text-align:left;
+  text-align:center;
 }
 
 .field{

@@ -27,17 +27,12 @@ class responsableModel extends ConnectDB
 
     private function executeGetAll()
     {
-        $query = "SELECT r.id_responsable,
-                         r.nom_rep,
-                         r.id_rol,
-                         ro.descripcion AS rol,
-                         r.estado,
-                         COALESCE(d.nom_dep, 'Sin asignar') AS dependencia_actual
-                  FROM responsables r
-                  LEFT JOIN roles ro ON r.id_rol = ro.id_rol
-                  LEFT JOIN cargo cr ON r.id_responsable = cr.id_responsable AND cr.estado = 1
-                  LEFT JOIN dependencias d ON cr.id_dep = d.id_dep
-                  ORDER BY r.nom_rep ASC";
+        $query = "SELECT r.id_responsable, r.nom_rep, r.id_rol, ro.descripcion AS rol, r.estado, COALESCE(d.nom_dep, 'Sin asignar') AS dependencia_actual
+                FROM responsables r
+                LEFT JOIN roles ro ON r.id_rol = ro.id_rol
+                LEFT JOIN cargo cr ON r.id_responsable = cr.id_responsable AND cr.estado = 1
+                LEFT JOIN dependencias d ON cr.id_dep = d.id_dep
+                ORDER BY r.nom_rep ASC";
         $stmt = $this->conex->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -76,15 +71,13 @@ class responsableModel extends ConnectDB
     {
         $stmt = $this->conex->prepare(
             "SELECT d.id_dep, d.nom_dep
-             FROM dependencias d
-             WHERE d.estado = 1
-               AND NOT EXISTS (
-                   SELECT 1
-                   FROM cargo cr
-                   WHERE cr.id_dep = d.id_dep
-                     AND cr.estado = 1
-               )
-             ORDER BY d.nom_dep ASC"
+            FROM dependencias d
+            WHERE d.estado = 1
+            AND NOT EXISTS (
+                SELECT 1 FROM cargo cr
+                WHERE cr.id_dep = d.id_dep AND cr.estado = 1
+            )
+            ORDER BY d.nom_dep ASC"
         );
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);

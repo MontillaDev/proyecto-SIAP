@@ -6,7 +6,7 @@ include_once 'app/view/layout/head.php';
 
 <!-- TOPBAR -->
 <div class="topbar">
-    <div class="topbar-title">ðŸ“… Registrar Año Fiscal</div>
+    <div class="topbar-title">Registrar Año Fiscal</div>
     <div class="topbar-actions">
         <a href="?url=anioFiscal&type=main" class="btn btn-outline btn-sm">&#8592; Volver</a>
     </div>

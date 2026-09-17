@@ -80,9 +80,7 @@ class reporteModel extends ConnectDB
                 WHERE d.estado = 1
                 AND EXISTS (
                     SELECT 1 FROM requerimientos r
-                    WHERE r.id_dep = d.id_dep
-                      AND r.estado = 1
-                      AND r.estado_envio = 1
+                    WHERE r.id_dep = d.id_dep AND r.estado = 1 AND r.estado_envio = 1
                 )
                 ORDER BY d.nom_dep ASC
             ";
@@ -206,10 +204,7 @@ class reporteModel extends ConnectDB
                     JOIN requerimientos r ON dr.id_req = r.id_req
                     JOIN anio_fiscal af ON r.id_aniof = af.id_aniof
                     JOIN tasa_bcv tb ON r.id_tasa = tb.id_tasa
-                    WHERE r.estado = 1 
-                      AND r.estado_envio = 1 
-                      AND af.activo = 1
-                      AND r.id_dep = ?
+                    WHERE r.estado = 1 AND r.estado_envio = 1 AND af.activo = 1 AND r.id_dep = ?
                 ) AS req_valido ON prod.id_prod = req_valido.id_prod
                 GROUP BY 
                     p.cod_partida, 
@@ -254,9 +249,7 @@ class reporteModel extends ConnectDB
                     JOIN requerimientos r ON dr.id_req = r.id_req
                     JOIN anio_fiscal af ON r.id_aniof = af.id_aniof
                     JOIN tasa_bcv tb ON r.id_tasa = tb.id_tasa
-                    WHERE r.estado = 1 
-                      AND r.estado_envio = 1 
-                      AND af.activo = 1
+                    WHERE r.estado = 1 AND r.estado_envio = 1 AND af.activo = 1
                 ) AS req_valido ON prod.id_prod = req_valido.id_prod
                 GROUP BY 
                     p.cod_partida, 

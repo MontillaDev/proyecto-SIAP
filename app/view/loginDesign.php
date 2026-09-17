@@ -22,7 +22,7 @@
         <div class="logo-placeholder" aria-hidden="true">
             <img src="assets/img/SIAPlogo.png" alt="SIAP">
         </div>
-        <p class="org-text"><strong>Coordinación de Planificación Presupuestaria</strong></p>
+        <p class="org-text"><strong>Coordinación de Proyectos Institucionales</strong></p>
         <p class="org-text">Universidad Politécnica Territorial<br/>Andrés Eloy Blanco — Estado Lara</p>
         <p class="org-text"><strong>UPTAEB</strong></p>
         </section>

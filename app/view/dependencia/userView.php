@@ -19,7 +19,7 @@ include_once 'app/view/layout/head.php';
             <span class="card-title">Dependencias</span>
         </div>
         <div class="card-body">
-            <div class="table-wrap">
+            <div class="table-wrapper">
                 <table id="tablaMain" class="siap-table" style="width:100%">
                     <thead><tr><th>ID</th><th>Nombre Dependencia</th><th>Acciones</th></tr></thead>
                     <tbody></tbody>
