@@ -3,7 +3,7 @@
         'name' => 'equipo-siap/siap',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '1d157dfd6bcd48fb46e5b7490222173a78d952b2',
+        'reference' => '24d04ecdb078ca2c325790d0747db8fd4efd4b74',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -22,7 +22,7 @@
         'equipo-siap/siap' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '1d157dfd6bcd48fb46e5b7490222173a78d952b2',
+            'reference' => '24d04ecdb078ca2c325790d0747db8fd4efd4b74',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
