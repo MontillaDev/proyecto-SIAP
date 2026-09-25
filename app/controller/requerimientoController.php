@@ -46,12 +46,15 @@ if (isset($_GET['type'])) {
         
         // 2. NUEVO: Petición AJAX para guardar los detalles de la partida actual
         if(isset($_POST['guardarPartida'])){
-            $idReq = isset($_POST['id_req']) ? $_POST['id_req'] : "";
+            $idReq = isset($_SESSION['id_req']) ? $_SESSION['id_req'] : 0;
             $partida = isset($_POST['partida_actual']) ? $_POST['partida_actual'] : '401';
             $cantidades = isset($_POST['cantidades']) ? $_POST['cantidades'] : [];
             $idDep = $_SESSION['id_dep'];
             
             $respuesta = $object->saveReq($idReq, $partida, $cantidades,$idDep);
+            if ($respuesta['status'] === 'success' && $respuesta['id_req']) {
+                $_SESSION['id_req'] = $respuesta['id_req'];
+            }
             echo json_encode($respuesta);
             die();
         }
@@ -91,22 +94,36 @@ if (isset($_GET['type'])) {
 
 // Nuevo bloque para recibir la actualización completa de la matriz
 if (isset($_POST['actualizarMatriz'])) {
-    $idReq = isset($_POST['id_req']) ? $_POST['id_req'] : 0;
+    $rol = $_SESSION['rol'] ?? 'Usuario';
+    $idDep = $_SESSION['id_dep'];
+    
+    if ($rol === 'Administrador') {
+        $idReq = isset($_POST['id_req']) ? (int)$_POST['id_req'] : 0;
+    } else {
+        $idReq = (int)$object->getActiveReqIdBySession($idDep, $rol);
+    }
+    
     $cantidades = isset($_POST['cantidades']) ? $_POST['cantidades'] : [];
     
     if ($idReq > 0) {
         $respuesta = $object->actualizarMatriz($idReq, $cantidades);
         echo json_encode($respuesta);
     } else {
-        echo json_encode(["status" => "error", "message" => "ID de requerimiento no válido."]);
+        echo json_encode(["status" => "error", "message" => "No hay requerimiento activo para actualizar."]);
     }
     die();
 }
 
 if (isset($_POST['cambiarEstado'])) {
-    $idReq = $_POST['id_req'];
+    $rol = $_SESSION['rol'] ?? 'Usuario';
+    $idDep = $_SESSION['id_dep'];
+    $idReq = (int)$object->getActiveReqIdBySession($idDep, $rol);
     
-    // Llamada a tu modelo
+    if ($idReq <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'No hay requerimiento activo para enviar.']);
+        exit;
+    }
+    
     $resultado = $object->cambiarEstadoRequerimiento($idReq); 
     
     if ($resultado) {
@@ -114,7 +131,7 @@ if (isset($_POST['cambiarEstado'])) {
     } else {
         echo json_encode(['status' => 'error', 'message' => 'No se pudo actualizar el estado.']);
     }
-    exit; // Importante para que no devuelva HTML adicional
+    exit;
 }
 
 // ... (Resto del código)

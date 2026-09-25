@@ -93,8 +93,8 @@ if (isset($timeLeft) && is_array($timeLeft) && $timeLeft[2] === false) {
                             <th>Oct</th>
                             <th>Nov</th>
                             <th>Dic</th>
-                            <th class="bg-primary">Total Físico</th>
-                            <th class="bg-success">Precio del Producto</th>
+                            <th class="bg-primary">Precio del Producto</th>
+                            <th class="bg-success">Total Físico</th>
                             <th class="bg-success">Total Usd</th>
                             <th class="bg-info">Total BS</th>
                         </tr>
@@ -103,16 +103,15 @@ if (isset($timeLeft) && is_array($timeLeft) && $timeLeft[2] === false) {
                         </tbody>
                         <!-- si es admin, entomces cargara el footer, que contiene los totales de los precios -->
                         <!-- colspan posiciona el th en la posicion 16 -->
-                        <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'Administrador'): ?>
                             <tfoot>
                                 <tr>
-                                    <th colspan="16" style="text-align:right">Gran Total:</th>
+                                    <th colspan="15" style="text-align:right">Gran Total:</th>
                                     <th></th> <!-- Total USD -->
+                                    <th></th> <!-- Total BS -->
                                     <th></th> <!-- Total BS -->
                                     <th></th> <!-- Acciones -->
                                 </tr>
                             </tfoot>
-                        <?php endif; ?>
                     </table>
                     <div id='contenedor-acciones'>
                         <!-- seria bueno implementar un estilo para cuando este desabilitado -->

@@ -50,6 +50,10 @@ class requerimientoModel extends ConnectDB {
         return $this->executeCambiarEstadoRequerimiento($idReq);
     }
 
+    public function getActiveReqIdBySession($idDep, $rol) {
+        return $this->getActiveReqId($idDep, $rol);
+    }
+
     // =========================================================================
     // MÉTODOS PRIVADOS PRINCIPALES (Ejecución de Lógica)
     // =========================================================================

@@ -67,14 +67,14 @@ $(document).ready(function() {
                 { data: 'Oct', render: function(data, type, row) { return loadData(data, row, 10); }},
                 { data: 'Nov', render: function(data, type, row) { return loadData(data, row, 11); }},
                 { data: 'Dic', render: function(data, type, row) { return loadData(data, row, 12); }},
-                { data: 'Total_Cantidad'},
                 { data: 'precio_unit_usd', visible: esAdmin ,render: $.fn.dataTable.render.number(',', '.', 2, '$') },
+                { data: 'Total_Cantidad'},
                 { data: 'total_usd', visible: esAdmin, render: $.fn.dataTable.render.number(',', '.', 2, '$')  },
                 { data: 'total_bs', visible: esAdmin , render: $.fn.dataTable.render.number(',', '.', 2, 'Bs ') }
                 
             ],
             
-            order: [[15, 'desc']],
+            order: [[16, 'desc']],
             autowidth: false,
             responsive: true,
             pageLength: 25,
@@ -89,10 +89,25 @@ $(document).ready(function() {
                     return typeof i === 'string' ? i.replace(/[\$,]/g, '') * 1 : typeof i === 'number' ? i : 0;
                 };
         
-                // Asumiendo que Total USD es la penúltima columna visible y Total BS la última
-                // Ajusta los índices (ej. 19 y 20) según la posición exacta de tus columnas
+                // Índices de columna (0-indexed): 
+                // 15 = precio_unit_usd (visible: esAdmin)
+                // 16 = Total_Cantidad (siempre visible)
+                // 17 = total_usd (visible: esAdmin)
+                // 18 = total_bs (visible: esAdmin)
+                var colCant = 16;
                 var colUsd = 17; 
                 var colBs = 18;
+        
+                // Sumamos el Total de Cantidad (siempre visible)
+                var totalCant = api.column(colCant).data().reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+        
+                // Opciones para asegurar que siempre haya 2 decimales
+                var formatoMoneda = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
+        
+                // Aplicamos el formato con comas a los resultados
+                $(api.column(colCant).footer()).html(totalCant.toLocaleString( 'es-CO'));
         
                 if (esAdmin) {
                     // Sumamos el Total de USD
@@ -104,12 +119,10 @@ $(document).ready(function() {
                     var totalBs = api.column(colBs).data().reduce(function (a, b) {
                         return intVal(a) + intVal(b);
                     }, 0);
-        // Opciones para asegurar que siempre haya 2 decimales
-            var formatoMoneda = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
-
-            // Aplicamos el formato con comas a los resultados
-            $(api.column(colUsd).footer()).html('$' + totalUsd.toLocaleString('en-US', formatoMoneda));
-            $(api.column(colBs).footer()).html('Bs ' + totalBs.toLocaleString('en-US', formatoMoneda));
+        
+                    // Aplicamos el formato con comas a los resultados
+                    $(api.column(colUsd).footer()).html('$' + totalUsd.toLocaleString('en-US', formatoMoneda));
+                    $(api.column(colBs).footer()).html('Bs ' + totalBs.toLocaleString('en-US', formatoMoneda));
                 }
             }
             
