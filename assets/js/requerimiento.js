@@ -1,6 +1,10 @@
 $(document).ready(function() {
 
     // =========================================================================
+    // 0. CONFIGURACIÓN GLOBAL
+    // =========================================================================
+
+    // =========================================================================
     // 1. LÓGICA DE LA TABLA PRINCIPAL (VISTA DE CONSOLIDADO Y ACTUALIZACIÓN)
     // =========================================================================
     
@@ -12,29 +16,29 @@ $(document).ready(function() {
                 method: 'POST',
                 data: function(d) {
                     d.getAll = true;
-                    d.id_dep_filtro = $('#select-dependencia').val(); // Enviamos la dependencia seleccionada
+                    d.id_dep_filtro = $('#id_dep_seleccionado').val(); // Enviamos la dependencia seleccionada
                 },
                 // Extraemos el id_req de forma dinámica cuando llegan los datos del servidor
                 dataSrc: function(json) {
-                    $('#id_req').val(0);
+                    idReq = 0;
                     var hayDatos = (json.data && json.data.length > 0);
                 
                     if (hayDatos) {
                         // Lógica de ID (la que ya tenías)
                         for (var i = 0; i < json.data.length; i++) {
                             if (json.data[i].id_req && json.data[i].id_req > 0) {
-                                $('#id_req').val(json.data[i].id_req);
+                                idReq = json.data[i].id_req;
                                 break; 
                             }
-
                         }
                 
-                        // Mostrar botón de Modificar (siempre visible si hay datos)
-                        if($('#select-dependencia').val() !== 'todos'){
-                        $('#btn-modificar').show();
-                        }
-                        else{
-                            $('#btn-modificar').hide();
+                        // Ocultar botón modificar al recargar datos; solo aparece al modificar un input
+                        $('#btn-modificar').hide();
+
+                        if (esAdmin && $('#select-dependencia').val() !== '' && $('#select-dependencia').val() !== 'todos') {
+                            $('#btn-eliminar').show();
+                        } else {
+                            $('#btn-eliminar').hide();
                         }
                         // Lógica para Enviar Definitivo
                         if (esAdmin) {
@@ -43,8 +47,9 @@ $(document).ready(function() {
                             $('#btn-cambiar-estado').show(); // El usuario normal SÍ lo ve
                         }
                     } else {
-                        // Si no hay datos, ocultamos ambos botones
+                        // Si no hay datos, ocultar el botón modificar
                         $('#btn-modificar').hide();
+                        $('#btn-eliminar').hide();
                         $('#btn-cambiar-estado').hide();
                     }
                     
@@ -129,14 +134,203 @@ $(document).ready(function() {
         });
         
 
-        $('#select-dependencia').on('change', function() {
-            if($(this).val() !== "") {
+        $('#select-dependencia').on('input change', function() {
+            var selectedName = $(this).val();
+            var selectedId = 0;
+            $('#select-dep-list option').each(function() {
+                if ($(this).val() === selectedName) {
+                    selectedId = $(this).data('id_dep');
+                    return false; // break
+                }
+            });
+            $('#id_dep_seleccionado').val(selectedId);
+            if(selectedName !== "") {
                 tabla.ajax.reload();
             } else {
                 // Si no hay nada seleccionado, limpiamos la tabla
                 tabla.clear().draw();
             }
         })
+
+        // =========================================================================
+        // TOGGLE VISTA MODAL (Admin)
+        // =========================================================================
+
+        $('#modalViewToggle').on('change', function() {
+            var isChecked = $(this).prop('checked');
+            
+            if (isChecked) {
+                // Ocultar columnas de meses (índices 3-14) en la tabla principal
+                for (var i = 3; i <= 14; i++) {
+                    tabla.column(i).visible(false);
+                }
+                // Ocultar botón modificar de la vista principal
+                $('#btn-modificar').hide();
+                $('#btn-ver-cantidades').show();
+                // Ocultar modal si estaba abierto
+                $('#modalCantidades').hide();
+                $('#btn-modificar-modal').hide().prop('disabled', true);
+            } else {
+                // Mostrar columnas de meses
+                for (var i = 3; i <= 14; i++) {
+                    tabla.column(i).visible(true);
+                }
+                // Mostrar botón modificar de la vista principal
+                $('#btn-modificar').show();
+                $('#btn-ver-cantidades').hide();
+                $('#modalCantidades').hide();
+                $('#btn-modificar-modal').hide().prop('disabled', true);
+                // Recargar datos para que se muestren los inputs
+                tabla.ajax.reload(null, false);
+            }
+        });
+
+        // =========================================================================
+        // BOTÓN VER CANTIDADES (abrir modal)
+        // =========================================================================
+
+        $('#btn-ver-cantidades').on('click', function() {
+            openModal();
+        });
+
+        // =========================================================================
+        // FUNCIÓN PARA ABRIR MODAL CON CANTIDADES
+        // =========================================================================
+
+        function openModal() {
+            var tbody = $('#tablaModalCantidades tbody');
+            tbody.empty();
+
+            // Si DataTable ya estaba inicializado, destruirlo para reconstruir
+            if ($.fn.DataTable.isDataTable('#tablaModalCantidades')) {
+                $('#tablaModalCantidades').DataTable().destroy();
+            }
+
+            var rowsData = tabla.rows().data().toArray();
+
+            rowsData.forEach(function(rowData) {
+                var producto = rowData.producto || '';
+                var dependencia = rowData.dependencia || '';
+                var idProd = rowData.id_prod || 0;
+                var meses = [];
+
+                for (var m = 1; m <= 12; m++) {
+                    var key = '';
+                    switch(m) {
+                        case 1: key = 'Ene'; break;
+                        case 2: key = 'Feb'; break;
+                        case 3: key = 'Mar'; break;
+                        case 4: key = 'Abr'; break;
+                        case 5: key = 'May'; break;
+                        case 6: key = 'Jun'; break;
+                        case 7: key = 'Jul'; break;
+                        case 8: key = 'Ago'; break;
+                        case 9: key = 'Sep'; break;
+                        case 10: key = 'Oct'; break;
+                        case 11: key = 'Nov'; break;
+                        case 12: key = 'Dic'; break;
+                    }
+                    var val = Number(rowData[key]) || 0;
+                    meses.push(val);
+                }
+
+                var cellsHtml = '<td>' + dependencia + '</td>';
+                cellsHtml += '<td>' + producto + '</td>';
+                for (var j = 0; j < 12; j++) {
+                    cellsHtml += '<td><input type="number" name="cantidades[' + idProd + '][' + (j + 1) + ']" min="0" value="' + meses[j] + '" style="width:55px; padding:4px; text-align:center; border:1px solid #ccc; border-radius:4px; font-size:12px;"></td>';
+                }
+
+                tbody.append('<tr>' + cellsHtml + '</tr>');
+            });
+
+            // FIX: evitar acumulación de eventos con off() antes de on()
+            $('#tablaModalCantidades tbody input').off('input').on('input', function() {
+                $('#btn-modificar-modal').prop('disabled', false).show();
+            });
+
+            // FIX: usar off() antes de on() para evitar duplicación del handler
+            $('#btn-modificar-modal').off('click').on('click', function(e) {
+                e.preventDefault();
+                var btn = $(this);
+                var textoOriginal = btn.text();
+                btn.prop('disabled', true).text('Guardando...');
+
+                var datosModal = $('#tablaModalCantidades tbody input').serialize();
+                var dataEnviar = datosModal + '&actualizarMatriz=true&id_req=' + idReq;
+
+                $.ajax({
+                    url: '?url=requerimiento&type=main',
+                    type: 'POST',
+                    data: dataEnviar,
+                    dataType: 'json',
+                    success: function(respuesta) {
+                        if(respuesta.status === 'success') {
+                            alert("Los datos han sido modificados y guardados exitosamente.");
+                            tabla.ajax.reload(null, false);
+                            // No se oculta el modal tras el éxito
+                            $('#btn-modificar-modal').prop('disabled', true).text(textoOriginal).hide();
+                        } else {
+                            alert("Error en el servidor: " + respuesta.message);
+                            btn.prop('disabled', false).text(textoOriginal);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                        alert("Ocurrió un error de conexión al intentar actualizar los datos.");
+                        btn.prop('disabled', false).text(textoOriginal);
+                    }
+                });
+            });
+
+            // Inicializar DataTable con búsqueda, paginación y registro limitado
+            // Si falla la inicialización (inputs dentro de td), se muestra la tabla base
+            var dtInstance = null;
+            try {
+                dtInstance = $('#tablaModalCantidades').DataTable({
+                    pageLength: 10,
+                    searching: true,
+                    pagingType: 'simple_numbers',
+                    lengthChange: false,
+                    info: true,
+                    autoWidth: false,
+                    dom: '<"top"lf>rt<"bottom"ip>',
+                    language: {
+                        url: "assets/js/DataTables/spanish.json",
+                        search: "Buscar:",
+                        lengthMenu: "Mostrar _MENU_ registros",
+                        info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                        paginate: { first: "Primero", last: "Último", next: "Siguiente", previous: "Anterior" }
+                    },
+                    columnDefs: [
+                        { "orderable": false, "targets": [0, 1] },
+                        { "searchable": true, "targets": "_all" }
+                    ]
+                });
+            } catch(e) {
+                console.error('DataTable modal initialization failed:', e);
+                // Si falla, la tabla HTML normal se muestra sin paginación JS
+            }
+
+            $('#modalCantidades').show();
+            $('#btn-modificar-modal').show().prop('disabled', true);
+        }
+
+        // =========================================================================
+        // CERRAR MODAL
+        // =========================================================================
+
+        $('#btnCerrarModal').on('click', function() {
+            $('#modalCantidades').hide();
+            $('#btn-modificar-modal').hide().prop('disabled', true);
+        });
+
+        // Cerrar modal al hacer clic fuera del panel
+        $('#modalCantidades').on('click', function(e) {
+            if (e.target === this) {
+                $(this).hide();
+                $('#btn-modificar-modal').hide().prop('disabled', true);
+            }
+        });
 
         function loadData(data, row, mes) {
             return `<input type="number" 
@@ -148,17 +342,17 @@ $(document).ready(function() {
         // console.log(esAdmin);
         $('#btn-modificar').prop('disabled', true);
 
-        // Detectar cualquier cambio en los inputs para habilitar el botón de envío
+        // Detectar cualquier cambio en los inputs para habilitar y mostrar el botón de envío
         $('#tablaMain').on('input', 'input[type="number"]', function() {
-            $('#btn-modificar').prop('disabled', false);
+            $('#btn-modificar').prop('disabled', false).show();
         });
 
         // Forzar actualización del id_req si el usuario hace clic directo en "Modificar"
-        $('#tablaMain').on('click', '.btn-modificar', function() {
-            var idClick = $(this).data('id');
-            $('#id_req').val(idClick);
-            $('#btn-modificar').prop('disabled', false);
-        });
+        // $('#tablaMain').on('click', '.btn-modificar', function() {
+        //     var idClick = $(this).data('id');
+        //     idReq = idClick;
+        //     $('#btn-modificar').prop('disabled', false);
+        // });
 
         // Enviar actualización matriz a la base de datos
         $('#btn-modificar').on('click', function(e) {
@@ -170,7 +364,6 @@ $(document).ready(function() {
             btn.prop('disabled', true).text('Guardando...');
 
             var datosInputs = tabla.$('input').serialize(); 
-            var idReq = $('#id_req').val(); 
             var dataEnviar = datosInputs + '&actualizarMatriz=true&id_req=' + idReq;
 
             $.ajax({
@@ -199,15 +392,56 @@ $(document).ready(function() {
                 }
             });
         });
+
+        $('#btn-eliminar').on('click', function(e) {
+            e.preventDefault();
+
+            if (!idReq || idReq <= 0) {
+                alert("No hay un requerimiento seleccionado.");
+                return;
+            }
+
+            // 🟢 Confirmación antes de eliminar
+            if (!confirm("¿Está seguro de eliminar este requerimiento? Esta acción no se puede deshacer.")) {
+                return;
+            }
+
+            var btn = $(this);
+            var textoOriginal = btn.text();
+            btn.prop('disabled', true).text('Eliminando...');
+
+            $.ajax({
+                url: '?url=requerimiento&type=main',
+                type: 'POST',
+                data: {
+                    eliminarRequerimiento: true,
+                    id_req: idReq
+                },
+                dataType: 'json',
+                success: function(respuesta) {
+                    if (respuesta.status === 'success') {
+                        alert(respuesta.message || "Requerimiento eliminado correctamente.");
+                        // Recargamos la tabla para reflejar los cambios (el requerimiento ya no aparecerá)
+                        tabla.ajax.reload(null, false);
+                    } else {
+                        alert("Error: " + respuesta.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                    alert("Ocurrió un error en la comunicación con el servidor.");
+                },
+                complete: function() {
+                    btn.prop('disabled', false).text(textoOriginal);
+                }
+            });
+        });
     }
     // Lógica para cambiar estado de 1 a 0
     $('#btn-cambiar-estado').on('click', function(e) {
         e.preventDefault();
         
-        // Obtenemos el ID del requerimiento desde el input oculto (o donde lo tengas guardado)
-        var idReq = $('#id_req').val();
-        
-        if(!idReq) {
+        if(!idReq || idReq <= 0) {
             alert("No hay un requerimiento seleccionado.");
             return;
         }
@@ -290,7 +524,6 @@ $(document).ready(function() {
             btn.prop('disabled', true).text('Guardando partida...');
 
             let datosInputs = tablaRegistro.$('input').serialize(); 
-            let idReq = $('#id_req').val();
             let partidaActual = $('#partida_actual').val();
 
             let dataEnviar = datosInputs + '&guardarPartida=true&id_req=' + idReq + '&partida_actual=' + partidaActual;
@@ -302,7 +535,7 @@ $(document).ready(function() {
                 dataType: 'json',
                 success: function(respuesta) {
                     if(respuesta.status === 'success') {
-                        $('#id_req').val(respuesta.id_req);
+                        idReq = respuesta.id_req;
                         
                         if(respuesta.siguiente_partida === 'FINAL') {
                             $('#btn-guardar').addClass('d-none');

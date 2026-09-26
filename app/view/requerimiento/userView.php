@@ -7,7 +7,6 @@ $perAct = $perAct ?? false;
 $timeLeft = $timeLeft ?? '';
 $dias = $dias ?? 0;
 $dependencias = $dependencias ?? [];
-$idReq = $idReq ?? 0;
 
 include_once 'app/view/layout/head.php';
 ?>
@@ -60,22 +59,32 @@ if (isset($timeLeft) && is_array($timeLeft) && $timeLeft[2] === false) {
         <?php if(($_SESSION['rol'] ?? '') == "Administrador"){?>
             <div class="col-md-4">
                 <label>Seleccionar Dependencia:</label>
-                <select id="select-dependencia" class="form-control">
-                    <option value="">-- Seleccione una dependencia --</option>
-                    <option value="todos">TODOS LOS REQUERIMIENTOS (Consolidado)</option>
+                <input list="select-dep-list" id="select-dependencia" class="field-input" placeholder="Buscar dependencia...">
+                <input type="hidden" id="id_dep_seleccionado" value="">
+                <datalist id="select-dep-list">
+                    <option value="todos" data-id_dep="todos"></option>
                     <?php foreach($dependencias as $dep): ?>
-                        <option value="<?php echo $dep['id_dep']; ?>"><?php echo $dep['nom_dep']; ?></option>
+                        <option value="<?php echo htmlspecialchars($dep['nom_dep']);?>" data-id_dep="<?php echo $dep['id_dep']; ?>"></option>
                     <?php endforeach; ?>
-                </select>
+                </datalist>
             </div>
+            <div class="col-md-4" style="display:flex; align-items:flex-end; padding-bottom: 8px;">
+                <label class="field-switch">
+                    <input type="checkbox" id="modalViewToggle">
+                    <span class="switch-slider"></span>
+                </label>
+                <span style="font-size: 13px; color: var(--text-muted); margin: 0 8px;">Ver cantidades en modal</span>
+            </div>
+            <button id="btn-ver-cantidades" class="btn btn-blue" style="display: none;">
+                &#128202; Ver Cantidades
+            </button>
         <?php } ?>
         </div>
         </div>
         <div class="card-body">
             <div class="table-wrap">
-            <input type="hidden" id="id_req" name="id_req" value="<?php echo $idReq; ?>">
-            <!-- class="siap-table" esta clase que va dentro de la tabla oculta los datos totales del footer. hay que acomodarlo-->
-                <table id="tablaMain" >
+            <!-- id_req se almacena en $_SESSION y se expone solo via JS variable, no en HTML -->
+            <table id="tablaMain" >
                     <thead>
                         <tr>
                             <th>dependencias</th>
@@ -114,22 +123,62 @@ if (isset($timeLeft) && is_array($timeLeft) && $timeLeft[2] === false) {
                             </tfoot>
                     </table>
                     <div id='contenedor-acciones'>
-                        <!-- seria bueno implementar un estilo para cuando este desabilitado -->
                         <button  id="btn-modificar" class="btn btn-success" style="display: none;">
                             Modificar
+                        </button>
+                        <button  id="btn-eliminar" class="btn btn-danger" style="display: none;">
+                            Eliminar
                         </button>
                         <button  id="btn-cambiar-estado" class="btn" style="display: none;">
                             Enviar Definitivo
                         </button>
                     </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
-<!-- este ecript atrapa en una variable el rol del usuario que ha entrado para usarlo en el archivo requerimiento.js -->
+<?php include_once 'app/view/layout/foot.php'; ?>
+
+<!-- MODAL CANTIDADES -->
+<div id="modalCantidades" class="modal-backdrop" style="display:none;">
+    <div class="modal-panel" style="max-width: 1200px;">
+        <div class="modal-header" id="modalHeaderCantidades">
+            <h3>Cantidades por Mes</h3>
+            <div class="flex gap-10">
+                <button type="button" id="btn-modificar-modal" class="btn btn-success btn-sm" style="display: none;" disabled>
+                    Modificar
+                </button>
+                <button id="btnCerrarModal" class="modal-close">&times;</button>
+            </div>
+        </div>
+        <div class="modal-body" id="modalBodyCantidades" style="max-height: 60vh; padding: 0;">
+            <table id="tablaModalCantidades" class="month-table siap-table" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Dependencia</th>
+                        <th>Producto</th>
+                        <th>Ene</th>
+                        <th>Feb</th>
+                        <th>Mar</th>
+                        <th>Abr</th>
+                        <th>May</th>
+                        <th>Jun</th>
+                        <th>Jul</th>
+                        <th>Ago</th>
+                        <th>Sep</th>
+                        <th>Oct</th>
+                        <th>Nov</th>
+                        <th>Dic</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <script>
     const esAdmin = '<?php echo $_SESSION["rol"] ?? ""; ?>' == 'Administrador';
+    let idReq = <?php echo json_encode($_SESSION['id_req'] ?? 0); ?>;
 </script>
-
-
-<?php include_once 'app/view/layout/foot.php'; ?>

@@ -46,6 +46,10 @@ class requerimientoModel extends ConnectDB {
         return $this->executeActualizarMatriz($idReq, $cantidades);
     }
 
+    public function eliminarRequerimiento($idReq){
+        return $this->executeEliminarRequerimiento($idReq);
+    }
+
     public function cambiarEstadoRequerimiento($idReq){
         return $this->executeCambiarEstadoRequerimiento($idReq);
     }
@@ -126,6 +130,10 @@ class requerimientoModel extends ConnectDB {
             //si no existe un requerimiento, se crea uno para empezar a guardar la info ahi
             if (empty($idReq) || $idReq == 0) {
                 $idReq = $this->createMasterRequirement($idDep);
+                if ($idReq == 0) {
+                    $this->conex->rollBack();
+                    return ["status" => "error", "message" => "Ya existe un requerimiento previo activo para esta dependencia."];
+                }
             }
             //verifica que existan las cantidades para los meses selecionados para insertar datos
             if (!empty($cantidades) && is_array($cantidades)) {
@@ -201,6 +209,18 @@ class requerimientoModel extends ConnectDB {
         ]);
     }
 
+    private function executeEliminarRequerimiento($idReq) {
+        try {
+            $sql = "UPDATE requerimientos SET estado = 0, estado_envio = 0 WHERE id_req = :id AND estado = 1";
+            $stmt = $this->conex->prepare($sql);
+            $stmt->execute([':id' => $idReq]);
+            return $stmt->rowCount() > 0;
+        } catch (\PDOException $e) {
+            error_log("Error eliminarRequerimiento: " . $e->getMessage());
+            return false;
+        }
+    }
+
     // =========================================================================
     // MÉTODOS PRIVADOS AUXILIARES (Responsabilidad Única)
     // =========================================================================
@@ -239,9 +259,9 @@ class requerimientoModel extends ConnectDB {
 
     private function buildQueryFilters($id, $rol) {
         if ($rol === 'Administrador' && $id === 'todos') {
-            return " AND r.estado_envio = 1";
+            return " AND r.estado_envio = 1 AND r.estado = 1";
         } elseif ($rol === 'Administrador') {
-            return " AND r.estado_envio = 1 AND d.id_dep = " . (int)$id;
+            return " AND r.estado_envio = 1 AND r.estado = 1 AND d.id_dep = " . (int)$id;
         } else {
             return " AND d.id_dep = " . (int)$id . " AND r.estado_envio = 0 AND r.estado = 1";
         }
