@@ -4,6 +4,11 @@ $jsFile    = "requerimiento.js";
 include_once 'app/view/layout/head.php';
 ?>
 
+<!-- Definir idReq para el flujo de registro -->
+<script>
+    let idReq = <?php echo json_encode($_SESSION['id_req'] ?? 0); ?>;
+</script>
+
 <!-- TOPBAR -->
 <div class="topbar">
     <div class="topbar-title">&#128203; Registrar Requerimiento</div>
@@ -34,7 +39,6 @@ include_once 'app/view/layout/head.php';
             <?php endif; ?>
             
             <form id="form-registro">
-                <input type="hidden" id="id_req" name="id_req" value="<?php echo $idReq; ?>">
                 <input type="hidden" id="partida_actual" name="partida_actual" value="401">
 
                 <div class="table-wrapper">
@@ -63,8 +67,6 @@ include_once 'app/view/layout/head.php';
         </div>
     </div>
 </div>
-
-</form>
 
 <?php include_once 'app/view/layout/foot.php'; ?>
 

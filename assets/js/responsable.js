@@ -207,4 +207,185 @@ $(document).ready(function() {
         });
     });
 
+
+    // ─── Roles: alta, edición y eliminación lógica ───────────────────
+    const ROL_PROTEGIDO = 'Administrador';
+
+    const tablaRoles = $('#tablaRoles').length ? $('#tablaRoles').DataTable({
+        ajax: { url: currentUrl, method: 'POST', data: { getAllRoles: true }, dataSrc: function(json) {
+            return (json && Array.isArray(json)) ? json : [];
+        }},
+        columns: [
+            { data: 'id_rol' },
+            { data: 'descripcion' },
+            { data: 'responsables' },
+            { data: 'estado', render: (d) => Number(d) === 1 ? '<span class="badge badge-success">Activo</span>' : '<span class="badge badge-danger">Inactivo</span>' },
+            { data: null, render: (d) => {
+                let actions = `<button value="${d.id_rol}" class="btn btn-sm btn-editar-rol text-white" style="margin-right:6px; background-color:#5bc0de; border-color:#46b8da;" aria-label="Editar">✏️</button>`;
+                if (d.descripcion === ROL_PROTEGIDO) {
+                    actions += ` <span class="badge badge-gray">protegido</span>`;
+                } else if (Number(d.estado) === 1) {
+                    actions += ` <button value="${d.id_rol}" class="btn btn-danger btn-sm btn-inactivar-rol" aria-label="Eliminar">🗑️</button>`;
+                } else {
+                    actions += ` <button value="${d.id_rol}" class="btn btn-success btn-sm btn-activar-rol" aria-label="Activar">✅</button>`;
+                }
+                return actions;
+            }}
+        ],
+        autoWidth: false,
+        language: { url: "assets/js/DataTables/spanish.json" }
+    }) : null;
+
+    function recargarRoles() {
+        if (tablaRoles) tablaRoles.ajax.reload();
+        // La tabla principal muestra la descripción del rol
+        tabla.ajax.reload();
+    }
+
+    $('#btnRoles').on('click', function() {
+        $('#modalRoles').show();
+        if (tablaRoles) tablaRoles.ajax.reload();
+    });
+
+    $('#btnNuevoRol').on('click', function() {
+        $('#formRol')[0].reset();
+        $('#modalRol').show();
+        $('#rol_descripcion').focus();
+    });
+
+    $('#btnCerrarModalRoles, #btnCerrarModalRoles2').on('click', function() { $('#modalRoles').hide(); });
+    $('#btnCerrarModalRol, #btnCerrarModalRol2').on('click', function() { $('#modalRol').hide(); });
+    $('#btnCerrarModalEditarRol, #btnCerrarModalEditarRol2').on('click', function() { $('#modalEditarRol').hide(); });
+
+    $('#modalRoles, #modalRol, #modalEditarRol').on('click', function(e) {
+        if (e.target === this) $(this).hide();
+    });
+
+    $(document).on('keydown', function(e) {
+        if (e.key === 'Escape') $('#modalRoles, #modalRol, #modalEditarRol').hide();
+    });
+
+    // Editar rol
+    $(document).on('click', '.btn-editar-rol', function() {
+        if (!tablaRoles) return;
+        const data = tablaRoles.row($(this).closest('tr')).data();
+        $('#editRol_id').val(data.id_rol);
+        $('#editRol_descripcion').val(data.descripcion);
+        $('#modalEditarRol').show();
+    });
+
+    // Eliminar rol (estado = 0)
+    $(document).on('click', '.btn-inactivar-rol', function() {
+        if (!tablaRoles) return;
+        const data = tablaRoles.row($(this).closest('tr')).data();
+        if (!confirm('¿Eliminar el rol "' + data.descripcion + '"?')) return;
+
+        $.ajax({
+            url: currentUrl,
+            method: 'POST',
+            dataType: 'json',
+            data: { idRol: data.id_rol, deleteRol: true },
+            success: function(res) {
+                alert((res && res.message) || (res && res.success ? 'Rol eliminado' : 'Error al eliminar el rol.'));
+                recargarRoles();
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX delete rol error:', status, error, xhr.responseText);
+                alert('Error en la petición de eliminación. Revise la consola.');
+            }
+        });
+    });
+
+    // Activar rol (estado = 1)
+    $(document).on('click', '.btn-activar-rol', function() {
+        const idRol = this.value;
+
+        $.ajax({
+            url: currentUrl,
+            method: 'POST',
+            dataType: 'json',
+            data: { idRol: idRol, activateRol: true },
+            success: function(res) {
+                alert((res && res.message) || (res && res.success ? 'Rol activado' : 'Error al activar el rol.'));
+                recargarRoles();
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX activate rol error:', status, error, xhr.responseText);
+                alert('Error en la petición de activación. Revise la consola.');
+            }
+        });
+    });
+
+    $('#formRol').on('submit', function(e) {
+        e.preventDefault();
+        const $form = $(this);
+        const $btn = $form.find('button[type="submit"]');
+        if ($btn.prop('disabled')) return;
+
+        const formData = new FormData($form[0]);
+        formData.append('registerRol', true);
+
+        $btn.prop('disabled', true).text('Guardando…');
+
+        $.ajax({
+            url: currentUrl,
+            method: 'POST',
+            data: formData,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            success: function(res) {
+                if (res && res.success) {
+                    alert(res.message || 'Rol registrado exitosamente');
+                    $('#modalRol').hide();
+                    recargarRoles();
+                } else {
+                    alert((res && res.message) || 'Error al registrar el rol.');
+                    $btn.prop('disabled', false).text('✓ Guardar rol');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX register rol error:', status, error, xhr.responseText);
+                alert('Error en la petición. Revise la consola.');
+                $btn.prop('disabled', false).text('✓ Guardar rol');
+            }
+        });
+    });
+
+    $('#formEditarRol').on('submit', function(e) {
+        e.preventDefault();
+        const $form = $(this);
+        const $btn = $form.find('button[type="submit"]');
+        if ($btn.prop('disabled')) return;
+
+        const formData = new FormData($form[0]);
+        formData.append('updateRol', true);
+
+        $btn.prop('disabled', true).text('Guardando…');
+
+        $.ajax({
+            url: currentUrl,
+            method: 'POST',
+            data: formData,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            success: function(res) {
+                if (res && res.success) {
+                    alert(res.message || 'Rol actualizado');
+                    $('#modalEditarRol').hide();
+                    recargarRoles();
+                } else {
+                    alert((res && res.message) || 'Error al actualizar el rol.');
+                    $btn.prop('disabled', false).text('✓ Guardar cambios');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX update rol error:', status, error, xhr.responseText);
+                alert('Error en la petición de actualización. Revise la consola.');
+                $btn.prop('disabled', false).text('✓ Guardar cambios');
+            }
+        });
+    });
+
 });

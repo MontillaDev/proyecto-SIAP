@@ -5,6 +5,21 @@
     $this->requireModule('responsable');
     $object = new responsableModel();
 
+    // Rol crítico: su descripción se compara como texto en session.php,
+    // sidebar.php y requerimientoController.php, por lo que no se puede eliminar.
+    if (!defined('ROL_PROTEGIDO')) {
+        define('ROL_PROTEGIDO', 'Administrador');
+    }
+
+    if (!function_exists('sendJson')) {
+        function sendJson($payload)
+        {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode($payload);
+            die();
+        }
+    }
+
     if (isset($_GET['type'])) {
 
         if ($_GET['type'] == 'list') {
@@ -138,6 +153,93 @@ if (isset($_POST['toggleEstado'])) {
             if (isset($_POST['getCargosByDep'])) {
                 echo json_encode($object->getCargosByDependencia((int)$_POST['id_dep']));
                 die();
+            }
+
+            // ─── Roles: alta, edición y eliminación lógica ─────────────
+            if (isset($_POST['getAllRoles'])) {
+                sendJson($object->getAllRoles());
+            }
+
+            if (isset($_POST['registerRol'])) {
+                $descripcion = isset($_POST['descripcion']) ? trim((string)$_POST['descripcion']) : '';
+
+                if ($descripcion === '') {
+                    sendJson(['success' => false, 'message' => 'La descripción del rol no puede estar vacía.']);
+                }
+
+                if (mb_strlen($descripcion) > 70) {
+                    sendJson(['success' => false, 'message' => 'La descripción del rol excede el máximo de 70 caracteres.']);
+                }
+
+                if ($object->existsRol($descripcion)) {
+                    sendJson(['success' => false, 'message' => 'Ya existe un rol con esa descripción.']);
+                }
+
+                $result = $object->addRol($descripcion);
+                sendJson(['success' => (bool)$result, 'message' => $result ? 'Rol registrado exitosamente' : 'Error al registrar el rol.']);
+            }
+
+            if (isset($_POST['updateRol'])) {
+                $idRol = isset($_POST['idRol']) ? (int)$_POST['idRol'] : 0;
+                $descripcion = isset($_POST['descripcion']) ? trim((string)$_POST['descripcion']) : '';
+
+                if ($idRol <= 0) {
+                    sendJson(['success' => false, 'message' => 'Rol no válido.']);
+                }
+
+                if ($descripcion === '') {
+                    sendJson(['success' => false, 'message' => 'La descripción del rol no puede estar vacía.']);
+                }
+
+                if (mb_strlen($descripcion) > 70) {
+                    sendJson(['success' => false, 'message' => 'La descripción del rol excede el máximo de 70 caracteres.']);
+                }
+
+                if ($object->existsRol($descripcion, $idRol)) {
+                    sendJson(['success' => false, 'message' => 'Ya existe otro rol con esa descripción.']);
+                }
+
+                $result = $object->updateRol($idRol, $descripcion);
+                sendJson(['success' => (bool)$result, 'message' => $result ? 'Rol actualizado' : 'Error al actualizar el rol.']);
+            }
+
+            if (isset($_POST['deleteRol'])) {
+                $idRol = isset($_POST['idRol']) ? (int)$_POST['idRol'] : 0;
+
+                if ($idRol <= 0) {
+                    sendJson(['success' => false, 'message' => 'Rol no válido.']);
+                }
+
+                $rol = $object->getRolById($idRol);
+                if (!$rol) {
+                    sendJson(['success' => false, 'message' => 'El rol no existe.']);
+                }
+
+                if ($rol['descripcion'] === ROL_PROTEGIDO) {
+                    sendJson(['success' => false, 'message' => 'No se puede eliminar el rol ' . ROL_PROTEGIDO . '.']);
+                }
+
+                $responsables = $object->countResponsablesActivos($idRol);
+                if ($responsables > 0) {
+                    sendJson([
+                        'success' => false,
+                        'message' => 'El rol tiene ' . $responsables . ' responsable(s) activo(s). Reasígnelos antes de eliminar el rol.'
+                    ]);
+                }
+
+                $res = $object->deleteRol($idRol);
+                sendJson(['success' => (bool)$res, 'message' => $res ? 'Rol eliminado' : 'Error al eliminar el rol.']);
+            }
+
+            if (isset($_POST['activateRol'])) {
+                $idRol = isset($_POST['idRol']) ? (int)$_POST['idRol'] : 0;
+
+                if ($idRol <= 0) {
+                    sendJson(['success' => false, 'message' => 'Rol no válido.']);
+                }
+
+                $res = $object->activateRol($idRol);
+                sendJson(['success' => (bool)$res, 'message' => $res ? 'Rol activado' : 'Error al activar el rol.']);
             }
 
             include 'app/view/responsable/userView.php';

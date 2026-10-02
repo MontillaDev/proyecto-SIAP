@@ -47,18 +47,22 @@ if (isset($_GET['type'])) {
         
         // 2. NUEVO: Petición AJAX para guardar los detalles de la partida actual
         if(isset($_POST['guardarPartida'])){
-            $idReq = isset($_POST['id_req']) ? $_POST['id_req'] : "";
+            // Priorizar id_req del POST (enviado por JS), fallback a sesión
+            $idReq = isset($_POST['id_req']) && $_POST['id_req'] > 0 ? (int)$_POST['id_req'] : (isset($_SESSION['id_req']) ? $_SESSION['id_req'] : 0);
             $partida = isset($_POST['partida_actual']) ? $_POST['partida_actual'] : '401';
             $cantidades = isset($_POST['cantidades']) ? $_POST['cantidades'] : [];
             $idDep = $_SESSION['id_dep'];
             
             $respuesta = $object->saveReq($idReq, $partida, $cantidades,$idDep);
+            if ($respuesta['status'] === 'success' && $respuesta['id_req']) {
+                $_SESSION['id_req'] = $respuesta['id_req'];
+            }
             echo json_encode($respuesta);
             die();
         }
     
         // Inicializamos la variable por si la vista la requiere vacía al principio
-        $idReq = 0; 
+        $canRegister = false; 
         include 'app/view/requerimiento/registerView.php';
     }
     elseif ($_GET['type'] == 'main') {
@@ -82,44 +86,97 @@ if (isset($_GET['type'])) {
         if (isset($_POST['getAll'])) {
             $reporte = $object->getAll();
             
+            // Almacenar id_req en sesión para uso posterior sin exponerlo en el HTML
+            $rol = $_SESSION['rol'] ?? 'Usuario';
+            $idDepFiltrar = ($rol === 'Administrador' && isset($_POST['id_dep_filtro'])) ? $_POST['id_dep_filtro'] : $_SESSION['id_dep'];
+            $activeReqId = $object->getActiveReqIdBySession($idDepFiltrar, $rol);
+            if ($activeReqId > 0) {
+                $_SESSION['id_req'] = $activeReqId;
+            }
+            
             // Si $reporte es false o vacío, enviamos un array vacío dentro de 'data'
             // Esto evita el error de DataTables
             echo json_encode(["data" => $reporte ? $reporte : []]);
             die();
         }
 
-// ... (Código anterior)
+        // ... (Código anterior)
 
-// Nuevo bloque para recibir la actualización completa de la matriz
-if (isset($_POST['actualizarMatriz'])) {
-    $idReq = isset($_POST['id_req']) ? $_POST['id_req'] : 0;
-    $cantidades = isset($_POST['cantidades']) ? $_POST['cantidades'] : [];
-    
-    if ($idReq > 0) {
-        $respuesta = $object->actualizarMatriz($idReq, $cantidades);
-        echo json_encode($respuesta);
-    } else {
-        echo json_encode(["status" => "error", "message" => "ID de requerimiento no válido."]);
+        // Nuevo bloque para recibir la actualización completa de la matriz
+    if (isset($_POST['actualizarMatriz'])) {
+        $rol = $_SESSION['rol'] ?? 'Usuario';
+        
+        // Usar id_req almacenado en sesión, con fallback al POST
+        $idReq = (int)($_SESSION['id_req'] ?? ($_POST['id_req'] ?? 0));
+        
+        $cantidades = isset($_POST['cantidades']) ? $_POST['cantidades'] : [];
+        
+        if ($idReq > 0) {
+            $respuesta = $object->actualizarMatriz($idReq, $cantidades);
+            echo json_encode($respuesta);
+        } else {
+            echo json_encode(["status" => "error", "message" => "No hay requerimiento activo para actualizar."]);
+        }
+        die();
     }
-    die();
-}
 
-if (isset($_POST['cambiarEstado'])) {
-    $idReq = $_POST['id_req'];
-    
-    // Llamada a tu modelo
-    $resultado = $object->cambiarEstadoRequerimiento($idReq); 
-    
-    if ($resultado) {
-        echo json_encode(['status' => 'success']);
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'No se pudo actualizar el estado.']);
+    if (isset($_POST['cambiarEstado'])) {
+        $rol = $_SESSION['rol'] ?? 'Usuario';
+        $idDep = $_SESSION['id_dep'];
+        // Priorizar id_req del POST, fallback a consulta de sesión
+        $idReq = (int)($_POST['id_req'] ?? $object->getActiveReqIdBySession($idDep, $rol));
+        
+        if ($idReq <= 0) {
+            echo json_encode(['status' => 'error', 'message' => 'No hay requerimiento activo para enviar.']);
+            exit;
+        }
+        
+        $resultado = $object->cambiarEstadoRequerimiento($idReq); 
+        
+        if ($resultado) {
+            echo json_encode(['status' => 'success']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'No se pudo actualizar el estado.']);
+        }
+        exit;
     }
-    exit; // Importante para que no devuelva HTML adicional
-}
 
-// ... (Resto del código)
-$dependencias = $object->getAllDep();
+    if (isset($_POST['eliminarRequerimiento'])) {
+        // Solo administradores
+        if (($_SESSION['rol'] ?? '') !== 'Administrador') {
+            echo json_encode(['status' => 'error', 'message' => 'No tiene permisos para eliminar requerimientos.']);
+            die();
+        }
+
+        // Priorizar id_req del POST, fallback a sesión
+        $idReq = isset($_POST['id_req']) && $_POST['id_req'] > 0 ? (int)$_POST['id_req'] : ($_SESSION['id_req'] ?? 0);
+
+        if ($idReq > 0) {
+            $resultado = $object->eliminarRequerimiento($idReq);
+            if ($resultado) {
+                echo json_encode(['status' => 'success', 'message' => 'Requerimiento eliminado correctamente.']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'No se pudo eliminar el requerimiento (puede que ya esté eliminado).']);
+            }
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'ID de requerimiento no válido.']);
+        }
+        die();
+    }
+
+        // ... (Resto del código)
+        $dependencias = $object->getAllDep();
+
+        // Inicializar $_SESSION['id_req'] para la vista si no existe
+        // Solo dentro del bloque main para no interferir con el registro
+        if (empty($_SESSION['id_req'] ?? null)) {
+            $rol = $_SESSION['rol'] ?? 'Usuario';
+            $idDepFiltrar = ($rol === 'Administrador' && isset($_POST['id_dep_filtro'])) ? $_POST['id_dep_filtro'] : $_SESSION['id_dep'];
+            $activeReqId = $object->getActiveReqIdBySession($idDepFiltrar, $rol);
+            if ($activeReqId > 0) {
+                $_SESSION['id_req'] = $activeReqId;
+            }
+        }
 
         include 'app/view/requerimiento/userView.php';
 

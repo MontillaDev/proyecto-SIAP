@@ -44,6 +44,86 @@ if (isset($_GET['type'])) {
             sendJsonResponse(['success' => (bool)$res, 'message' => $res ? 'Registro inhabilitado' : 'Error al inhabilitar']);
         }
 
+        if (isset($_POST['getAllPartidas'])) {
+            sendJsonResponse($object->getAllPartidas());
+        }
+
+        if (isset($_POST['registerPartida'])) {
+            $codPartida = isset($_POST['cod_partida']) ? trim((string)$_POST['cod_partida']) : '';
+            $descripcion = isset($_POST['descripcion']) ? trim((string)$_POST['descripcion']) : '';
+
+            if ($codPartida === '' || $descripcion === '') {
+                sendJsonResponse(['success' => false, 'message' => 'El codigo y la descripcion de la partida son obligatorios.']);
+            }
+
+            if (mb_strlen($codPartida) > 10 || mb_strlen($descripcion) > 150) {
+                sendJsonResponse(['success' => false, 'message' => 'El codigo (max. 10) o la descripcion (max. 150) exceden el largo permitido.']);
+            }
+
+            // Evitar partidas duplicadas por codigo
+            if ($object->existsPartida($codPartida)) {
+                sendJsonResponse(['success' => false, 'message' => 'Ya existe una partida presupuestaria con ese codigo.']);
+            }
+
+            $result = $object->addPartida($codPartida, $descripcion);
+            sendJsonResponse([
+                'success' => (bool)$result,
+                'message' => $result ? 'Partida presupuestaria registrada' : 'Error al guardar la partida (codigo duplicado o error BD).'
+            ]);
+        }
+
+        if (isset($_POST['updatePartida'])) {
+            $idPartida = isset($_POST['idPartida']) ? (int)$_POST['idPartida'] : 0;
+            $codPartida = isset($_POST['cod_partida']) ? trim((string)$_POST['cod_partida']) : '';
+            $descripcion = isset($_POST['descripcion']) ? trim((string)$_POST['descripcion']) : '';
+            $estado = isset($_POST['estado']) ? (int)$_POST['estado'] : 1;
+
+            if ($idPartida <= 0) {
+                sendJsonResponse(['success' => false, 'message' => 'Partida presupuestaria no valida.']);
+            }
+
+            if ($codPartida === '' || $descripcion === '') {
+                sendJsonResponse(['success' => false, 'message' => 'El codigo y la descripcion de la partida son obligatorios.']);
+            }
+
+            if (mb_strlen($codPartida) > 10 || mb_strlen($descripcion) > 150) {
+                sendJsonResponse(['success' => false, 'message' => 'El codigo (max. 10) o la descripcion (max. 150) exceden el largo permitido.']);
+            }
+
+            // El código no puede pertenecer a otra partida
+            if ($object->existsPartida($codPartida, $idPartida)) {
+                sendJsonResponse(['success' => false, 'message' => 'Ya existe otra partida presupuestaria con ese codigo.']);
+            }
+
+            $result = $object->updatePartida($idPartida, $codPartida, $descripcion, $estado);
+            sendJsonResponse([
+                'success' => (bool)$result,
+                'message' => $result ? 'Partida presupuestaria actualizada' : 'Error al actualizar la partida (codigo duplicado o error BD).'
+            ]);
+        }
+
+        if (isset($_POST['deletePartida'])) {
+            $idPartida = isset($_POST['idPartida']) ? (int)$_POST['idPartida'] : 0;
+
+            if ($idPartida <= 0) {
+                sendJsonResponse(['success' => false, 'message' => 'Partida presupuestaria no valida.']);
+            }
+
+            $res = $object->deletePartida($idPartida);
+            sendJsonResponse(['success' => (bool)$res, 'message' => $res ? 'Partida presupuestaria eliminada' : 'Error al eliminar la partida']);
+        }
+
+        if (isset($_POST['activatePartida'])) {
+            $idPartida = isset($_POST['idPartida']) ? (int)$_POST['idPartida'] : 0;
+
+            if ($idPartida <= 0) {
+                sendJsonResponse(['success' => false, 'message' => 'Partida presupuestaria no valida.']);
+            }
+
+            $res = $object->activatePartida($idPartida);
+            sendJsonResponse(['success' => (bool)$res, 'message' => $res ? 'Partida presupuestaria activada' : 'Error al activar la partida']);
+        }
+
         if (isset($_POST['loadData'])) {
             $res = $object->loadData();
         }

@@ -1554,7 +1554,8 @@ INSERT INTO `responsables` (`id_responsable`, `id_rol`, `nom_rep`, `password`, `
 
 CREATE TABLE `roles` (
   `id_rol` int(11) NOT NULL,
-  `descripcion` varchar(70) NOT NULL
+  `descripcion` varchar(70) NOT NULL,
+  `estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 --

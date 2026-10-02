@@ -35,7 +35,7 @@ class productosServiciosModel extends ConnectDB
     {
         return $this->executeGetAll($partidaId);
     }
-
+    
     private function executeGetAll(?int $partidaId = null): array
     {
         $sql = "SELECT pro.id_prod, pro.id_partida, pro.id_proveedor, p.cod_partida, p.descripcion AS partida_descripcion,
@@ -137,6 +137,126 @@ class productosServiciosModel extends ConnectDB
             return false;
         }
     }
+    // ─── Partidas presupuestarias ───────────────────────────────────────
+    // Verifica si la partida ya existe (validación pública)
+    public function existsPartida(string $codPartida, ?int $excludeId = null): bool
+    {
+        return $this->executeExistsPartida($codPartida, $excludeId);
+    }
+
+    private function executeExistsPartida(string $codPartida, ?int $excludeId = null): bool
+    {
+        $query = "SELECT 1 FROM partidas WHERE cod_partida = ?";
+        $params = [trim($codPartida)];
+
+        if ($excludeId !== null) {
+            $query .= " AND id_partida <> ?";
+            $params[] = $excludeId;
+        }
+
+        $stmt = $this->conex->prepare($query . " LIMIT 1");
+        $stmt->execute($params);
+        return (bool)$stmt->fetchColumn();
+    }
+
+    public function addPartida(string $codPartida, string $descripcion): bool
+    {
+        if (trim($codPartida) === '' || trim($descripcion) === '') {
+            return false;
+        }
+        return $this->executeAddPartida($codPartida, $descripcion);
+    }
+
+    private function executeAddPartida(string $codPartida, string $descripcion): bool
+    {
+        try {
+            // Evitar partidas duplicadas por código
+            if ($this->executeExistsPartida($codPartida)) {
+                return false;
+            }
+
+            $stmt = $this->conex->prepare(
+                "INSERT INTO partidas (cod_partida, descripcion, estado)
+                 VALUES (?, ?, 1)"
+            );
+            return $stmt->execute([trim($codPartida), trim($descripcion)]);
+        } catch (\PDOException $e) {
+            return false;
+        }
+    }
+
+    // Listado completo de partidas (incluye las inhabilitadas)
+    public function getAllPartidas(): array
+    {
+        return $this->executeGetAllPartidas();
+    }
+
+    private function executeGetAllPartidas(): array
+    {
+        $stmt = $this->conex->prepare(
+            "SELECT id_partida, cod_partida, descripcion, estado
+             FROM partidas
+             ORDER BY cod_partida"
+        );
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function updatePartida(int $idPartida, string $codPartida, string $descripcion, int $estado): bool
+    {
+        return $this->executeUpdatePartida($idPartida, $codPartida, $descripcion, $estado);
+    }
+
+    private function executeUpdatePartida(int $idPartida, string $codPartida, string $descripcion, int $estado): bool
+    {
+        try {
+            // El código no puede pertenecer a otra partida
+            if ($this->executeExistsPartida($codPartida, $idPartida)) {
+                return false;
+            }
+
+            $stmt = $this->conex->prepare(
+                "UPDATE partidas
+                 SET cod_partida = ?, descripcion = ?, estado = ?
+                 WHERE id_partida = ?"
+            );
+            return $stmt->execute([trim($codPartida), trim($descripcion), $estado === 1 ? 1 : 0, $idPartida]);
+        } catch (\PDOException $e) {
+            return false;
+        }
+    }
+
+    // Eliminar lógicamente una partida (estado = 0)
+    public function deletePartida(int $idPartida): bool
+    {
+        return $this->executeDeletePartida($idPartida);
+    }
+
+    private function executeDeletePartida(int $idPartida): bool
+    {
+        try {
+            $stmt = $this->conex->prepare("UPDATE partidas SET estado = 0 WHERE id_partida = ?");
+            return $stmt->execute([$idPartida]);
+        } catch (\PDOException $e) {
+            return false;
+        }
+    }
+
+    public function activatePartida(int $idPartida): bool
+    {
+        return $this->executeActivatePartida($idPartida);
+    }
+
+    private function executeActivatePartida(int $idPartida): bool
+    {
+        try {
+            $stmt = $this->conex->prepare("UPDATE partidas SET estado = 1 WHERE id_partida = ?");
+            return $stmt->execute([$idPartida]);
+        } catch (\PDOException $e) {
+            return false;
+        }
+    }
+
     /*public function loadData(){
         $result = $this->executeLoadData();
     }
