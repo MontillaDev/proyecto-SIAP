@@ -142,7 +142,7 @@ if (isset($timeLeft) && is_array($timeLeft) && $timeLeft[2] === false) {
 
 <!-- MODAL CANTIDADES -->
 <div id="modalCantidades" class="modal-backdrop" style="display:none;">
-    <div class="modal-panel" style="max-width: 1200px;">
+    <div class="modal-panel" style="max-width: min(92vw, 1300px); max-height: 88vh;">
         <div class="modal-header" id="modalHeaderCantidades">
             <h3>Cantidades por Mes</h3>
             <div class="flex gap-10">
@@ -152,7 +152,7 @@ if (isset($timeLeft) && is_array($timeLeft) && $timeLeft[2] === false) {
                 <button id="btnCerrarModal" class="modal-close">&times;</button>
             </div>
         </div>
-        <div class="modal-body" id="modalBodyCantidades" style="max-height: 60vh; padding: 0;">
+        <div class="modal-body" id="modalBodyCantidades">
             <table id="tablaModalCantidades" class="month-table siap-table" style="width:100%">
                 <thead>
                     <tr>

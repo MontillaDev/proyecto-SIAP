@@ -263,7 +263,7 @@ a { text-decoration: none; color: inherit; }
 }
 .btn-warning:hover { opacity: .88; }
 .btn-outline {
-  background: transparent;
+  background: ;
   color: var(--text-mid);
   border-color: var(--border);
 }
@@ -452,7 +452,7 @@ a { text-decoration: none; color: inherit; }
   position: fixed;
   top: 14px;
   left: calc(var(--sidebar-w) + 12px);
-  z-index: 350;
+  z-index: 100;
   width: 40px;
   height: 40px;
   border: none;
@@ -798,7 +798,7 @@ table.siap-table {
 .modal-close:hover { background: var(--bg); color: var(--text-dark); }
 .modal-body { padding: 20px 24px; }
 .modal-footer {
-  padding: 16px 24px;
+  padding: 16px 14px;
   border-top: 1px solid var(--border-light);
   display: flex;
   gap: 10px;
@@ -967,12 +967,23 @@ table.siap-table {
    z-index: 10;
    background: var(--white);
    box-shadow: 0 1px 4px rgba(13,27,46,.08);
+   border-radius: 0;
 }
 #modalHeaderCantidades h3 {
    margin: 0;
    font-size: 15px;
    font-weight: 700;
    color: var(--text-dark);
+}
+/* Ventana de cantidades: sin bordes ni esquinas redondeadas */
+#modalCantidades .modal-panel {
+   border: none;
+   border-radius: 0;
+   box-shadow: var(--shadow-lg);
+}
+/* Margen interno para que la tabla no pegue contra el borde de la ventana */
+#modalBodyCantidades {
+   padding: 18px 22px 22px;
 }
 .modal-body {
    padding: 20px 24px;
@@ -983,22 +994,78 @@ table.siap-table {
 #tablaModalCantidades thead th {
    background: var(--navy);
    color: rgba(255,255,255,.8);
-   font-size: 11.5px;
+   font-size: 11px;
    font-weight: 600;
-   padding: 9px 8px;
+   padding: 7px 5px;
    text-align: center;
 }
 #tablaModalCantidades thead th:first-child {
    text-align: left;
-   min-width: 140px;
+   min-width: 130px;
 }
 #tablaModalCantidades tbody td {
-   padding: 8px 8px;
+   padding: 6px 5px;
    text-align: center;
-   font-size: 12.5px;
+   font-size: 12px;
    color: var(--text-mid);
 }
 #tablaModalCantidades tbody td:first-child {
    text-align: left;
    font-weight: 500;
+}
+/* Inputs de cantidades dentro de la tabla del modal */
+#tablaModalCantidades input[type="number"] {
+   width: 50px;
+   padding: 4px 3px;
+   text-align: center;
+   border: 1px solid var(--border-light);
+   border-radius: 4px;
+   font-size: 12px;
+   outline: none;
+   transition: border-color .15s;
+}
+#tablaModalCantidades input[type="number"]:focus {
+   border-color: var(--blue);
+}
+/* Controles de DataTable dentro del modal
+   Nota: en DataTables 2 el wrapper y .dt-container son el mismo elemento,
+   por eso el selector usa el signo de unión en vez de espacio. */
+#tablaModalCantidades_wrapper.dt-container {
+   font-size: 13px;
+   padding: 0;
+}
+/* Números de paginación (DataTables 2 usa .dt-paging-button, no .paginate_button).
+   El color necesita !important porque DataTables impone color: inherit !important,
+   y sin él el texto queda oscuro sobre el fondo navy de la página actual. */
+#tablaModalCantidades_wrapper .dt-paging .dt-paging-button {
+   padding: 4px 10px !important;
+   min-width: auto;
+   margin: 0 2px !important;
+   border: 1px solid var(--border-light) !important;
+   border-radius: 4px !important;
+   background: var(--white) !important;
+   color: var(--text-dark) !important;
+   font-size: 13px;
+   cursor: pointer;
+}
+#tablaModalCantidades_wrapper .dt-paging .dt-paging-button:hover:not(.current):not(.disabled) {
+   background: var(--bg) !important;
+   border-color: var(--blue) !important;
+   color: var(--text-dark) !important;
+}
+/* Página actual: fondo navy con texto blanco */
+#tablaModalCantidades_wrapper .dt-paging .dt-paging-button.current,
+#tablaModalCantidades_wrapper .dt-paging .dt-paging-button.current:hover {
+   background: var(--navy) !important;
+   border-color: var(--navy) !important;
+   color: #ffffff !important;
+}
+/* Botones deshabilitados (extremos de la paginación) */
+#tablaModalCantidades_wrapper .dt-paging .dt-paging-button.disabled,
+#tablaModalCantidades_wrapper .dt-paging .dt-paging-button.disabled:hover,
+#tablaModalCantidades_wrapper .dt-paging .dt-paging-button.disabled:active {
+   background: var(--white) !important;
+   border-color: var(--border-light) !important;
+   color: var(--text-muted) !important;
+   cursor: default;
 }

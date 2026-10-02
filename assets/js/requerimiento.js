@@ -10,6 +10,14 @@ $(document).ready(function() {
     
     // Inicializamos la tabla principal solo si existe en el DOM
     if ($('#tablaMain').length > 0) {
+        // Indica si el admin eligió una dependencia concreta en el datalist.
+        // Con la opción "todos" la tabla es un consolidado de varias dependencias,
+        // así que no se puede modificar: se actualizaría el requerimiento equivocado.
+        function hayDependenciaElegida() {
+            var seleccion = $('#select-dependencia').val();
+            return seleccion !== '' && seleccion !== undefined && seleccion !== 'todos';
+        }
+
         const tabla = $('#tablaMain').DataTable({
             ajax: {
                 url: "?url=requerimiento&type=main",
@@ -35,10 +43,14 @@ $(document).ready(function() {
                         // Ocultar botón modificar al recargar datos; solo aparece al modificar un input
                         $('#btn-modificar').hide();
 
-                        if (esAdmin && $('#select-dependencia').val() !== '' && $('#select-dependencia').val() !== 'todos') {
+                        if (esAdmin && hayDependenciaElegida()) {
                             $('#btn-eliminar').show();
                         } else {
                             $('#btn-eliminar').hide();
+                        }
+                        // Con la opción "todos" el consolidado no es modificable
+                        if (!hayDependenciaElegida()) {
+                            $('#btn-modificar-modal').hide().prop('disabled', true);
                         }
                         // Lógica para Enviar Definitivo
                         if (esAdmin) {
@@ -144,6 +156,10 @@ $(document).ready(function() {
                 }
             });
             $('#id_dep_seleccionado').val(selectedId);
+            // Si se elige "todos" o se limpia el datalist, el consolidado no es modificable
+            if (!hayDependenciaElegida()) {
+                $('#btn-modificar-modal').hide().prop('disabled', true);
+            }
             if(selectedName !== "") {
                 tabla.ajax.reload();
             } else {
@@ -198,65 +214,106 @@ $(document).ready(function() {
         // =========================================================================
 
         function openModal() {
-            var tbody = $('#tablaModalCantidades tbody');
-            tbody.empty();
-
-            // Si DataTable ya estaba inicializado, destruirlo para reconstruir
+            // Destruir DataTable anterior si existe para reconstruir
             if ($.fn.DataTable.isDataTable('#tablaModalCantidades')) {
                 $('#tablaModalCantidades').DataTable().destroy();
             }
+            $('#tablaModalCantidades tbody').empty();
 
             var rowsData = tabla.rows().data().toArray();
+            var monthKeys = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+                             'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-            rowsData.forEach(function(rowData) {
-                var producto = rowData.producto || '';
-                var dependencia = rowData.dependencia || '';
-                var idProd = rowData.id_prod || 0;
-                var meses = [];
-
+            // Valores originales por id_prod, usados para serializar al guardar
+            var cantidadesOriginales = {};
+            rowsData.forEach(function(row) {
+                var idProd = row.id_prod;
+                cantidadesOriginales[idProd] = {};
                 for (var m = 1; m <= 12; m++) {
-                    var key = '';
-                    switch(m) {
-                        case 1: key = 'Ene'; break;
-                        case 2: key = 'Feb'; break;
-                        case 3: key = 'Mar'; break;
-                        case 4: key = 'Abr'; break;
-                        case 5: key = 'May'; break;
-                        case 6: key = 'Jun'; break;
-                        case 7: key = 'Jul'; break;
-                        case 8: key = 'Ago'; break;
-                        case 9: key = 'Sep'; break;
-                        case 10: key = 'Oct'; break;
-                        case 11: key = 'Nov'; break;
-                        case 12: key = 'Dic'; break;
+                    cantidadesOriginales[idProd][m] = Number(row[monthKeys[m - 1]]) || 0;
+                }
+            });
+
+            // Cambios hechos por el usuario, sobreviven al cambio de página
+            var cantidadesModificadas = {};
+
+            function createInput(idProd, mes, valorOriginal) {
+                var name = 'cantidades[' + idProd + '][' + mes + ']';
+                var value = cantidadesModificadas.hasOwnProperty(name)
+                    ? cantidadesModificadas[name]
+                    : valorOriginal;
+                return '<input type="number" name="' + name + '" min="0" value="' + value + '">';
+            }
+
+            function mesColumn(mes) {
+                return {
+                    data: monthKeys[mes - 1],
+                    render: function(data, type, row) {
+                        return createInput(row.id_prod, mes, data);
                     }
-                    var val = Number(rowData[key]) || 0;
-                    meses.push(val);
-                }
+                };
+            }
 
-                var cellsHtml = '<td>' + dependencia + '</td>';
-                cellsHtml += '<td>' + producto + '</td>';
-                for (var j = 0; j < 12; j++) {
-                    cellsHtml += '<td><input type="number" name="cantidades[' + idProd + '][' + (j + 1) + ']" min="0" value="' + meses[j] + '" style="width:55px; padding:4px; text-align:center; border:1px solid #ccc; border-radius:4px; font-size:12px;"></td>';
-                }
-
-                tbody.append('<tr>' + cellsHtml + '</tr>');
+            $('#tablaModalCantidades').DataTable({
+                data: rowsData,
+                deferRender: true,
+                pageLength: 25,
+                lengthChange: true,
+                lengthMenu: [10, 25, 50, 100],
+                searching: true,
+                pagingType: 'simple_numbers',
+                ordering: false,
+                info: true,
+                autoWidth: false,
+                dom: '<"top"lfrt>rt<"bottom"ip>',
+                language: {
+                    url: "assets/js/DataTables/spanish.json",
+                    search: "Buscar:",
+                    lengthMenu: "Mostrar _MENU_ registros",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                    paginate: { first: "Primero", last: "Último", next: "Siguiente", previous: "Anterior" }
+                },
+                columns: [
+                    { data: 'dependencia' },
+                    { data: 'producto' },
+                    mesColumn(1),  mesColumn(2),  mesColumn(3),  mesColumn(4),
+                    mesColumn(5),  mesColumn(6),  mesColumn(7),  mesColumn(8),
+                    mesColumn(9),  mesColumn(10), mesColumn(11), mesColumn(12)
+                ],
+                columnDefs: [
+                    { "orderable": false, "targets": "_all" }
+                ]
             });
 
-            // FIX: evitar acumulación de eventos con off() antes de on()
-            $('#tablaModalCantidades tbody input').off('input').on('input', function() {
-                $('#btn-modificar-modal').prop('disabled', false).show();
+            // Event delegation: los inputs se crean de forma diferida con deferRender
+            $('#tablaModalCantidades tbody').off('input', 'input[type="number"]').on('input', 'input[type="number"]', function() {
+                cantidadesModificadas[$(this).attr('name')] = $(this).val();
+                // Solo se habilita la modificación con una dependencia concreta seleccionada
+                if (hayDependenciaElegida()) {
+                    $('#btn-modificar-modal').prop('disabled', false).show();
+                }
             });
 
-            // FIX: usar off() antes de on() para evitar duplicación del handler
             $('#btn-modificar-modal').off('click').on('click', function(e) {
                 e.preventDefault();
                 var btn = $(this);
                 var textoOriginal = btn.text();
                 btn.prop('disabled', true).text('Guardando...');
 
-                var datosModal = $('#tablaModalCantidades tbody input').serialize();
-                var dataEnviar = datosModal + '&actualizarMatriz=true&id_req=' + idReq;
+                // Serializar desde los datos originales + las modificaciones del usuario
+                var partes = [];
+                Object.keys(cantidadesOriginales).forEach(function(idProd) {
+                    for (var mes = 1; mes <= 12; mes++) {
+                        var name = 'cantidades[' + idProd + '][' + mes + ']';
+                        var valor = cantidadesModificadas.hasOwnProperty(name)
+                            ? cantidadesModificadas[name]
+                            : cantidadesOriginales[idProd][mes];
+                        if (Number(valor) > 0) {
+                            partes.push(name + '=' + encodeURIComponent(valor));
+                        }
+                    }
+                });
+                var dataEnviar = partes.join('&') + '&actualizarMatriz=true&id_req=' + idReq;
 
                 $.ajax({
                     url: '?url=requerimiento&type=main',
@@ -266,6 +323,7 @@ $(document).ready(function() {
                     success: function(respuesta) {
                         if(respuesta.status === 'success') {
                             alert("Los datos han sido modificados y guardados exitosamente.");
+                            cantidadesModificadas = {};
                             tabla.ajax.reload(null, false);
                             // No se oculta el modal tras el éxito
                             $('#btn-modificar-modal').prop('disabled', true).text(textoOriginal).hide();
@@ -282,37 +340,13 @@ $(document).ready(function() {
                 });
             });
 
-            // Inicializar DataTable con búsqueda, paginación y registro limitado
-            // Si falla la inicialización (inputs dentro de td), se muestra la tabla base
-            var dtInstance = null;
-            try {
-                dtInstance = $('#tablaModalCantidades').DataTable({
-                    pageLength: 10,
-                    searching: true,
-                    pagingType: 'simple_numbers',
-                    lengthChange: false,
-                    info: true,
-                    autoWidth: false,
-                    dom: '<"top"lf>rt<"bottom"ip>',
-                    language: {
-                        url: "assets/js/DataTables/spanish.json",
-                        search: "Buscar:",
-                        lengthMenu: "Mostrar _MENU_ registros",
-                        info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                        paginate: { first: "Primero", last: "Último", next: "Siguiente", previous: "Anterior" }
-                    },
-                    columnDefs: [
-                        { "orderable": false, "targets": [0, 1] },
-                        { "searchable": true, "targets": "_all" }
-                    ]
-                });
-            } catch(e) {
-                console.error('DataTable modal initialization failed:', e);
-                // Si falla, la tabla HTML normal se muestra sin paginación JS
-            }
-
             $('#modalCantidades').show();
-            $('#btn-modificar-modal').show().prop('disabled', true);
+            // El botón Modificar solo aparece si hay una dependencia concreta elegida
+            if (hayDependenciaElegida()) {
+                $('#btn-modificar-modal').show().prop('disabled', true);
+            } else {
+                $('#btn-modificar-modal').hide().prop('disabled', true);
+            }
         }
 
         // =========================================================================

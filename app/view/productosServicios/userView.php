@@ -8,6 +8,7 @@ include_once 'app/view/layout/head.php';
     <div class="topbar-title">Productos y Servicios</div>
     <div class="topbar-actions">
         <a href="?url=productosServicios&type=register" class="btn btn-success btn-sm">&#43; Registrar</a>
+        <button type="button" id="btnPartidas" class="btn btn-outline btn-sm">&#128203; Partidas presupuestaria</button>
     </div>
 </div>
 
@@ -89,7 +90,7 @@ include_once 'app/view/layout/head.php';
 
                 <div class="field-group">
                     <label class="field-label">Nombre del producto o servicio</label>
-                    <input type="text" id="edit_nom_item" name="nom_item" class="field-input" required>
+                    <input type="text" id="edit_nom_prod" name="nom_item" class="field-input" required>
                 </div>
 
                 <div class="field-group">
@@ -101,6 +102,103 @@ include_once 'app/view/layout/head.php';
             <div class="modal-footer">
                 <button type="button" id="btnCerrarModal2" class="btn btn-outline">Cancelar</button>
                 <button type="submit" class="btn btn-success">Guardar cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="modalPartidas" class="modal-backdrop" style="display:none; z-index:210;">
+    <div class="modal-panel" style="max-width:760px;">
+        <div class="modal-header">
+            <h3>Partidas presupuestarias</h3>
+            <button id="btnCerrarModalPartidas" class="modal-close">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="table-wrap">
+                <table id="tablaPartidas" class="siap-table" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Código</th>
+                        <th>Descripción</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" id="btnNuevaPartida" class="btn btn-outline" style="margin-right:auto;">&#43; Nueva partida</button>
+            <button type="button" id="btnCerrarModalPartidas2" class="btn btn-success">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div id="modalPartida" class="modal-backdrop" style="display:none; z-index:220;">
+    <div class="modal-panel">
+        <div class="modal-header">
+            <h3>Nueva partida presupuestaria</h3>
+            <button id="btnCerrarModalPartida" class="modal-close">&times;</button>
+        </div>
+
+        <form id="formPartida">
+            <div class="modal-body">
+                <div class="field-group">
+                    <label class="field-label">Código de partida</label>
+                    <input type="text" id="partida_cod" name="cod_partida" class="field-input" maxlength="10" placeholder="Ej. 401" required>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Descripción</label>
+                    <input type="text" id="partida_descripcion" name="descripcion" class="field-input" maxlength="150" placeholder="Ej. Productos (Insumos, materiales, suministros)" required>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="btnCerrarModalPartida2" class="btn btn-outline">Cancelar</button>
+                <button type="submit" class="btn btn-success">&#10003; Guardar partida</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="modalEditarPartida" class="modal-backdrop" style="display:none; z-index:230;">
+    <div class="modal-panel">
+        <div class="modal-header">
+            <h3>Editar partida presupuestaria</h3>
+            <button id="btnCerrarModalEditarPartida" class="modal-close">&times;</button>
+        </div>
+
+        <form id="formPartidaEditar">
+            <input type="hidden" id="editPartida_id" name="idPartida">
+
+            <div class="modal-body">
+                <div class="field-group">
+                    <label class="field-label">Código de partida</label>
+                    <input type="text" id="editPartida_cod" name="cod_partida" class="field-input" maxlength="10" required>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Descripción</label>
+                    <input type="text" id="editPartida_descripcion" name="descripcion" class="field-input" maxlength="150" required>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Estado</label>
+                    <select id="editPartida_estado" name="estado" class="field-input field-select" required>
+                        <option value="1">Activo</option>
+                        <option value="0">Inactivo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="btnCerrarModalEditarPartida2" class="btn btn-outline">Cancelar</button>
+                <button type="submit" class="btn btn-success">&#10003; Guardar cambios</button>
             </div>
         </form>
     </div>

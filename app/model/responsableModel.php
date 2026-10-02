@@ -50,9 +50,153 @@ class responsableModel extends ConnectDB
 
     private function executeGetRoles()
     {
-        $stmt = $this->conex->prepare("SELECT id_rol, descripcion FROM roles ORDER BY descripcion ASC");
+        $stmt = $this->conex->prepare("SELECT id_rol, descripcion, estado FROM roles WHERE estado = 1 ORDER BY descripcion ASC");
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    // ─── Roles (mantenimiento) ─────────────────────────────────────────
+    // Listado completo de roles con la cantidad de responsables activos
+    public function getAllRoles()
+    {
+        return $this->executeGetAllRoles();
+    }
+
+    private function executeGetAllRoles()
+    {
+        $stmt = $this->conex->prepare(
+            "SELECT ro.id_rol,
+                    ro.descripcion,
+                    ro.estado,
+                    COUNT(CASE WHEN r.estado = 1 THEN 1 END) AS responsables
+             FROM roles ro
+             LEFT JOIN responsables r ON r.id_rol = ro.id_rol
+             GROUP BY ro.id_rol, ro.descripcion, ro.estado
+             ORDER BY ro.descripcion ASC"
+        );
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function getRolById(int $idRol)
+    {
+        return $this->executeGetRolById($idRol);
+    }
+
+    private function executeGetRolById(int $idRol)
+    {
+        $stmt = $this->conex->prepare("SELECT id_rol, descripcion, estado FROM roles WHERE id_rol = ? LIMIT 1");
+        $stmt->execute([$idRol]);
+        return $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+    }
+
+    // Verificación pública para evitar descripciones duplicadas
+    public function existsRol(string $descripcion, ?int $excludeId = null): bool
+    {
+        return $this->executeExistsRol($descripcion, $excludeId);
+    }
+
+    private function executeExistsRol(string $descripcion, ?int $excludeId = null): bool
+    {
+        $query = "SELECT 1 FROM roles WHERE LOWER(TRIM(descripcion)) = LOWER(TRIM(?))";
+        $params = [$descripcion];
+
+        if ($excludeId !== null) {
+            $query .= " AND id_rol <> ?";
+            $params[] = $excludeId;
+        }
+
+        $stmt = $this->conex->prepare($query . " LIMIT 1");
+        $stmt->execute($params);
+        return (bool)$stmt->fetchColumn();
+    }
+
+    // Responsables activos que tienen este rol asignado
+    public function countResponsablesActivos(int $idRol): int
+    {
+        return $this->executeCountResponsablesActivos($idRol);
+    }
+
+    private function executeCountResponsablesActivos(int $idRol): int
+    {
+        $stmt = $this->conex->prepare("SELECT COUNT(*) FROM responsables WHERE id_rol = ? AND estado = 1");
+        $stmt->execute([$idRol]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function addRol(string $descripcion): bool
+    {
+        if (trim($descripcion) === '') {
+            return false;
+        }
+        return $this->executeAddRol($descripcion);
+    }
+
+    private function executeAddRol(string $descripcion): bool
+    {
+        try {
+            if ($this->executeExistsRol($descripcion)) {
+                return false;
+            }
+
+            $stmt = $this->conex->prepare("INSERT INTO roles (descripcion, estado) VALUES (?, 1)");
+            return $stmt->execute([trim($descripcion)]);
+        } catch (\PDOException $e) {
+            return false;
+        }
+    }
+
+    public function updateRol(int $idRol, string $descripcion): bool
+    {
+        if ($idRol <= 0 || trim($descripcion) === '') {
+            return false;
+        }
+        return $this->executeUpdateRol($idRol, $descripcion);
+    }
+
+    private function executeUpdateRol(int $idRol, string $descripcion): bool
+    {
+        try {
+            if ($this->executeExistsRol($descripcion, $idRol)) {
+                return false;
+            }
+
+            $stmt = $this->conex->prepare("UPDATE roles SET descripcion = ? WHERE id_rol = ?");
+            return $stmt->execute([trim($descripcion), $idRol]);
+        } catch (\PDOException $e) {
+            return false;
+        }
+    }
+
+    // Eliminar lógicamente un rol (estado = 0)
+    public function deleteRol(int $idRol): bool
+    {
+        return $this->executeDeleteRol($idRol);
+    }
+
+    private function executeDeleteRol(int $idRol): bool
+    {
+        try {
+            $stmt = $this->conex->prepare("UPDATE roles SET estado = 0 WHERE id_rol = ?");
+            return $stmt->execute([$idRol]);
+        } catch (\PDOException $e) {
+            return false;
+        }
+    }
+
+    public function activateRol(int $idRol): bool
+    {
+        return $this->executeActivateRol($idRol);
+    }
+
+    private function executeActivateRol(int $idRol): bool
+    {
+        try {
+            $stmt = $this->conex->prepare("UPDATE roles SET estado = 1 WHERE id_rol = ?");
+            return $stmt->execute([$idRol]);
+        } catch (\PDOException $e) {
+            return false;
+        }
     }
 
     public function getDependencias()
