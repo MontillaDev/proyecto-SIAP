@@ -2,7 +2,8 @@
 
 
 use EquipoSiap\Siap\model\requerimientoModel;
-require_once "app/config/session.php";
+$this->requireLogin();
+$this->requireModule('requerimiento');
 
 $object = new requerimientoModel();
 // $items = new productosServiciosModel();

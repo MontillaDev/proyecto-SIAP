@@ -12,6 +12,8 @@ class responsableModel extends ConnectDB
     private $nom_rep;
     private $password;
     private $estado;
+    // Expresión regular de correo (acepta dominios como .com.ve)
+    public $expEmail = '/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/';
 
     public function __construct()
     {
@@ -27,7 +29,7 @@ class responsableModel extends ConnectDB
 
     private function executeGetAll()
     {
-        $query = "SELECT r.id_responsable, r.nom_rep, r.id_rol, ro.descripcion AS rol, r.estado, COALESCE(d.nom_dep, 'Sin asignar') AS dependencia_actual
+        $query = "SELECT r.id_responsable, r.nom_rep, r.email, r.id_rol, ro.descripcion AS rol, r.estado, COALESCE(d.nom_dep, 'Sin asignar') AS dependencia_actual
                 FROM responsables r
                 LEFT JOIN roles ro ON r.id_rol = ro.id_rol
                 LEFT JOIN cargo cr ON r.id_responsable = cr.id_responsable AND cr.estado = 1
@@ -96,22 +98,41 @@ class responsableModel extends ConnectDB
         return (bool)$stmt->fetchColumn();
     }
 
-    // CRUD básico
-    public function add(string $nomRep, string $password, int $idRol, int $idDep)
+    // Validación pública para evitar duplicados por correo (excluye un id, para editar)
+    public function existsByEmail(string $email, ?int $excludeId = null): bool
     {
-        return $this->executeAdd($nomRep, $password, $idRol, $idDep);
+        return $this->executeExistsByEmail($email, $excludeId);
     }
 
-    private function executeAdd(string $nomRep, string $password, int $idRol, int $idDep)
+    private function executeExistsByEmail(string $email, ?int $excludeId = null): bool
+    {
+        if ($excludeId !== null) {
+            $stmt = $this->conex->prepare("SELECT 1 FROM responsables WHERE email = ? AND id_responsable != ?");
+            $stmt->execute([$email, $excludeId]);
+        } else {
+            $stmt = $this->conex->prepare("SELECT 1 FROM responsables WHERE email = ?");
+            $stmt->execute([$email]);
+        }
+        return (bool)$stmt->fetchColumn();
+    }
+
+    // CRUD básico
+    public function add(string $nomRep, string $password, int $idRol, int $idDep, string $email)
+    {
+        return $this->executeAdd($nomRep, $password, $idRol, $idDep, $email);
+    }
+
+    private function executeAdd(string $nomRep, string $password, int $idRol, int $idDep, string $email)
     {
         try {
             $this->conex->beginTransaction();
 
             $hash = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $this->conex->prepare("INSERT INTO responsables (id_rol, nom_rep, password, estado) VALUES (?, ?, ?, 1)");
+            $stmt = $this->conex->prepare("INSERT INTO responsables (id_rol, nom_rep, email, password, estado) VALUES (?, ?, ?, ?, 1)");
             $stmt->bindValue(1, $idRol, \PDO::PARAM_INT);
             $stmt->bindValue(2, $nomRep);
-            $stmt->bindValue(3, $hash);
+            $stmt->bindValue(3, $email);
+            $stmt->bindValue(4, $hash);
             $stmt->execute();
 
             $idResponsable = (int)$this->conex->lastInsertId();
@@ -131,12 +152,12 @@ class responsableModel extends ConnectDB
         }
     }
 
-    public function update(int $id, ?string $nomRep, ?string $password, ?int $estado, ?int $idRol)
+    public function update(int $id, ?string $nomRep, ?string $password, ?int $estado, ?int $idRol, ?string $email = null)
     {
-        return $this->executeUpdate($id, $nomRep, $password, $estado, $idRol);
+        return $this->executeUpdate($id, $nomRep, $password, $estado, $idRol, $email);
     }
 
-    private function executeUpdate(int $id, ?string $nomRep, ?string $password, ?int $estado, ?int $idRol)
+    private function executeUpdate(int $id, ?string $nomRep, ?string $password, ?int $estado, ?int $idRol, ?string $email = null)
     {
         try {
             $query = "UPDATE responsables SET ";
@@ -158,6 +179,10 @@ class responsableModel extends ConnectDB
             if ($estado !== null) {
                 $parts[] = "estado = ?";
                 $params[] = $estado;
+            }
+            if ($email !== null && trim($email) !== '') {
+                $parts[] = "email = ?";
+                $params[] = $email;
             }
 
             if (empty($parts)) {

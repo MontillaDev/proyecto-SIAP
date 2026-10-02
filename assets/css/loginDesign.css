@@ -1,197 +1,795 @@
-:root{
-  --bg-center:#041125;
-  --bg-edge:#000000;
-  --card:#ffffff;
-  --text-gray:#49515c;
-  --text-gray-2:#6b7280;
-  --field-bg:#f3f4f6;
-  --field-border:#d1d5db;
-  --btn:#0A2540;
-  --btn-hover:#0b2b4f;
+:root {
+    --bg-center: #eef2f7;
+    --bg-edge: #dfe5ec;
+
+    --card: #ffffff;
+
+    --text-main: #111827;
+    --text-gray: #667085;
+    --text-gray-2: #98a2b3;
+
+    --field-bg: #f7f8fa;
+    --field-border: #e2e5e9;
+    --field-focus: #9aa9bd;
+
+    --btn: #0a2540;
+    --btn-hover: #123957;
+
+    --panel-dark: #071a2d;
+    --panel-dark-2: #0d314e;
 }
 
-*{ box-sizing:border-box; }
-body{
-  margin:0;
-  min-height:100vh;
-  font-family:"Open Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background: radial-gradient(circle at center, var(--bg-center) 0%, #020915 35%, var(--bg-edge) 100%);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:24px;
+/* =========================================================
+   RESET
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
 }
 
-.card{
-  width:min(520px, 100%);
-  background:var(--card);
-  border-radius:14px;
-  padding:34px 28px 22px;
-  box-shadow:0 14px 40px rgba(0,0,0,.35);
+html,
+body {
+    width: 100%;
+    min-height: 100%;
 }
 
-.header{
-  text-align:center;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:10px;
-  margin-bottom:18px;
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    font-family:
+        "Open Sans",
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+    background:
+        radial-gradient(
+            circle at 50% 45%,
+            var(--bg-center) 0%,
+            #e8edf3 45%,
+            var(--bg-edge) 100%
+        );
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 30px;
 }
 
-.logo-placeholder{
-  width:96px;
-  height:96px;
-  border-radius:18px;
-  background: linear-gradient(135deg, #eef2ff, #dbeafe);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#0A2540;
-  font-weight:700;
-  letter-spacing:.5px;
-  border:1px solid rgba(10,37,64,.18);
-  -webkit-user-select:none;
-  user-select:none;
-  overflow:hidden;
+
+/* =========================================================
+   LOGIN CARD
+   ========================================================= */
+
+.card {
+    position: relative;
+
+    width: min(900px, 100%);
+    min-height: 560px;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+
+    overflow: hidden;
+
+    background: var(--card);
+
+    border: 8px solid #ffffff;
+    border-radius: 26px;
+
+    box-shadow:
+        0 25px 70px rgba(15, 23, 42, 0.16),
+        0 8px 25px rgba(15, 23, 42, 0.08);
 }
 
-.logo-placeholder img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  display:block;
+
+/* =========================================================
+   PANEL DERECHO
+   Se crea exclusivamente con CSS.
+   No modifica tu HTML.
+   ========================================================= */
+
+.card::before {
+    content: "";
+
+    grid-column: 2;
+    grid-row: 1 / 4;
+
+    position: relative;
+    z-index: 0;
+
+    min-width: 0;
+    min-height: 100%;
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(4, 17, 37, 0.94),
+            rgba(7, 34, 55, 0.86)
+        ),
+        url("../img/SIAPlogo.png") center 72% / 190px auto no-repeat;
+
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
-.org-text{
-  margin:0;
-  font-size:13px;
-  color:var(--text-gray);
-  font-weight:300;
-  line-height:1.35;
-  text-align:center;
-}
-.org-text strong{
-  font-weight:600;
+
+/*
+   Texto decorativo del panel derecho.
+   Es solamente visual; no tiene ninguna función.
+*/
+
+.card::after {
+    content:
+        "Bienvenido\A"
+        "al sistema SIAP\A\A"
+        "Gestión institucional\A"
+        "presupuestaria";
+
+    grid-column: 2;
+    grid-row: 1 / 4;
+
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px;
+
+    color: #ffffff;
+
+    text-align: center;
+    white-space: pre-line;
+
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.65;
+
+    letter-spacing: 0.2px;
+
+    pointer-events: none;
 }
 
-.form{
-  margin-top:10px;
-  padding-top:6px;
+
+/* =========================================================
+   CONTENIDO IZQUIERDO
+   ========================================================= */
+
+.header,
+.form,
+.footer {
+    grid-column: 1;
+
+    position: relative;
+    z-index: 3;
+
+    width: 100%;
 }
 
-.welcome-title{
-  margin:0 0 6px;
-  font-family:"Playfair Display", "Times New Roman", serif;
-  font-size:26px;
-  font-weight:700;
-  color:#0a0a0a;
-  text-align:center;
-}
-.welcome-subtitle{
-  margin:0 0 16px;
-  font-size:13px;
-  color:var(--text-gray-2);
-  font-weight:400;
-  text-align:center;
-}
 
-.field{
-  position:relative;
-  margin-bottom:14px;
-}
+/* =========================================================
+   HEADER / LOGO
+   ========================================================= */
 
-.field input{
-  width:100%;
-  padding:14px 44px 14px 48px;
-  border-radius:12px;
-  background:var(--field-bg);
-  border:1px solid var(--field-border);
-  outline:none;
-  font-size:14.5px;
-  color:#111827;
-  transition: box-shadow .2s ease, border-color .2s ease;
+.header {
+    grid-row: 1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 7px;
+
+    padding:
+        32px
+        40px
+        8px;
 }
 
-.field input::placeholder{
-  color:#9ca3af;
-  font-weight:300;
+.logo-placeholder {
+    width: 82px;
+    height: 82px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 4px;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f4f7fb,
+            #e7edf5
+        );
+
+    border: 1px solid rgba(10, 37, 64, 0.10);
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 8px 20px rgba(15, 23, 42, 0.07);
+
+    user-select: none;
 }
 
-.field input:focus{
-  border-color:#7aa2ff;
-  box-shadow:0 0 0 4px rgba(122,162,255,.20);
+.logo-placeholder img {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
 }
 
-.icon-left{
-  position:absolute;
-  left:14px;
-  top:50%;
-  transform:translateY(-50%);
-  color:#6b7280;
-  width:18px;
-  height:18px;
-  pointer-events:none;
+
+/* =========================================================
+   INFORMACIÓN INSTITUCIONAL
+   ========================================================= */
+
+.org-text {
+    margin: 0;
+
+    color: var(--text-gray);
+
+    font-size: 11.5px;
+    font-weight: 300;
+
+    line-height: 1.45;
+
+    text-align: center;
 }
 
-.icon-right{
-  position:absolute;
-  right:14px;
-  top:50%;
-  transform:translateY(-50%);
-  width:22px;
-  height:22px;
-  cursor:pointer;
-  color:#6b7280;
-  pointer-events:auto;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  -webkit-user-select:none;
-  user-select:none;
+.org-text strong {
+    color: #344054;
+
+    font-weight: 600;
 }
 
-.icon-right svg{ width:20px; height:20px; }
 
-.btn{
-  width:100%;
-  border:none;
-  border-radius:12px;
-  background:var(--btn);
-  color:#fff;
-  font-weight:600;
-  padding:14px 16px;
-  font-size:15px;
-  cursor:pointer;
-  transition: transform .06s ease, background .15s ease, box-shadow .15s ease;
-  text-decoration:none;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
+/* =========================================================
+   FORMULARIO
+   ========================================================= */
+
+.form {
+    grid-row: 2;
+
+    padding:
+        10px
+        40px
+        0;
 }
 
-.btn:hover{
-  background:var(--btn-hover);
-  box-shadow:0 10px 22px rgba(10,37,64,.22);
+.welcome-title {
+    margin: 0 0 5px;
+
+    color: var(--text-main);
+
+    font-family:
+        "Playfair Display",
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 29px;
+    font-weight: 700;
+
+    line-height: 1.2;
+
+    text-align: center;
 }
 
-.btn:active{
-  transform: translateY(1px);
+.welcome-subtitle {
+    margin: 0 0 22px;
+
+    color: var(--text-gray-2);
+
+    font-size: 12.5px;
+    font-weight: 400;
+
+    line-height: 1.5;
+
+    text-align: center;
 }
 
-.footer{
-  margin-top:18px;
-  padding-top:14px;
-  text-align:center;
-  font-size:11px;
-  color:var(--text-gray-2);
-  font-weight:300;
-  line-height:1.5;
+
+/* =========================================================
+   ERROR PHP
+   ========================================================= */
+
+.error-message {
+    margin-bottom: 14px !important;
+
+    padding: 10px 12px !important;
+
+    color: #b42318 !important;
+    background: #fff1f0 !important;
+
+    border: 1px solid #fecdca !important;
+    border-radius: 10px !important;
+
+    font-size: 12px;
+
+    line-height: 1.4;
 }
 
-/* Responsive tweaks */
-@media (max-width: 420px){
-  .card{ padding:28px 18px 18px; }
-  .welcome-title{ font-size:24px; }
-  .form{ padding-top:0; }
+
+/* =========================================================
+   INPUTS
+   ========================================================= */
+
+.field {
+    position: relative;
+
+    margin-bottom: 13px;
+}
+
+.field input {
+    width: 100%;
+    height: 50px;
+
+    padding:
+        13px
+        46px
+        13px
+        46px;
+
+    color: #1d2939;
+    background: var(--field-bg);
+
+    border: 1px solid var(--field-border);
+    border-radius: 13px;
+
+    outline: none;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 400;
+
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.2s ease;
+}
+
+.field input::placeholder {
+    color: #a4acb9;
+
+    font-weight: 300;
+}
+
+.field input:hover {
+    background: #f4f6f8;
+
+    border-color: #d5d9df;
+}
+
+.field input:focus {
+    background: #ffffff;
+
+    border-color: var(--field-focus);
+
+    box-shadow:
+        0 0 0 4px rgba(10, 37, 64, 0.08);
+}
+
+
+/* =========================================================
+   ICONOS
+   ========================================================= */
+
+.icon-left {
+    position: absolute;
+
+    left: 15px;
+    top: 50%;
+
+    width: 18px;
+    height: 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #7b8491;
+
+    transform: translateY(-50%);
+
+    pointer-events: none;
+}
+
+.icon-left svg {
+    width: 18px;
+    height: 18px;
+
+    display: block;
+}
+
+.icon-right {
+    position: absolute;
+
+    right: 13px;
+    top: 50%;
+
+    width: 24px;
+    height: 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #7b8491;
+
+    transform: translateY(-50%);
+
+    cursor: pointer;
+
+    border-radius: 50%;
+
+    transition:
+        color 0.2s ease,
+        background 0.2s ease;
+}
+
+.icon-right:hover {
+    color: var(--btn);
+
+    background: rgba(10, 37, 64, 0.06);
+}
+
+.icon-right svg {
+    width: 19px;
+    height: 19px;
+}
+
+
+/* =========================================================
+   BOTÓN
+   ========================================================= */
+
+.btn {
+    width: 100%;
+    min-height: 50px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-top: 4px;
+
+    padding: 13px 18px;
+
+    color: #ffffff;
+    background: var(--btn);
+
+    border: 0;
+    border-radius: 13px;
+
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+
+    letter-spacing: 0.15px;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 8px 18px rgba(10, 37, 64, 0.16);
+
+    transition:
+        background 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.15s ease;
+}
+
+.btn:hover {
+    background: var(--btn-hover);
+
+    box-shadow:
+        0 12px 25px rgba(10, 37, 64, 0.22);
+
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(1px);
+
+    box-shadow:
+        0 5px 12px rgba(10, 37, 64, 0.15);
+}
+
+.btn:focus-visible {
+    outline: none;
+
+    box-shadow:
+        0 0 0 4px rgba(10, 37, 64, 0.14),
+        0 8px 18px rgba(10, 37, 64, 0.16);
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.footer {
+    grid-row: 3;
+
+    padding:
+        14px
+        40px
+        24px;
+
+    color: var(--text-gray-2);
+
+    font-size: 10.5px;
+    font-weight: 300;
+
+    line-height: 1.5;
+
+    text-align: center;
+}
+
+.footer div {
+    max-width: 360px;
+
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+/* =========================================================
+   ANIMACIONES SUAVES
+   ========================================================= */
+
+.header {
+    animation: loginFadeUp 0.55s ease both;
+}
+
+.form {
+    animation: loginFadeUp 0.65s 0.05s ease both;
+}
+
+.footer {
+    animation: loginFadeUp 0.7s 0.1s ease both;
+}
+
+.card::before {
+    animation: panelFade 0.8s ease both;
+}
+
+@keyframes loginFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes panelFade {
+    from {
+        opacity: 0;
+        transform: translateX(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 760px) {
+
+    body {
+        padding: 22px;
+    }
+
+    .card {
+        width: min(620px, 100%);
+
+        min-height: 0;
+
+        display: block;
+
+        border-radius: 24px;
+    }
+
+    /*
+       En pantallas pequeñas ocultamos el panel decorativo
+       para conservar una experiencia cómoda.
+    */
+
+    .card::before,
+    .card::after {
+        display: none;
+    }
+
+    .header {
+        padding:
+            30px
+            35px
+            8px;
+    }
+
+    .form {
+        padding:
+            10px
+            35px
+            0;
+    }
+
+    .footer {
+        padding:
+            14px
+            35px
+            24px;
+    }
+}
+
+
+/* =========================================================
+   MÓVIL
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+    body {
+        padding: 14px;
+
+        background:
+            radial-gradient(
+                circle at center,
+                #f3f6f9 0%,
+                #e5eaf0 100%
+            );
+    }
+
+    .card {
+        width: 100%;
+
+        border-width: 6px;
+        border-radius: 21px;
+
+        box-shadow:
+            0 18px 45px rgba(15, 23, 42, 0.14);
+    }
+
+    .header {
+        padding:
+            25px
+            18px
+            7px;
+
+        gap: 6px;
+    }
+
+    .logo-placeholder {
+        width: 74px;
+        height: 74px;
+
+        border-radius: 17px;
+    }
+
+    .org-text {
+        font-size: 10.5px;
+    }
+
+    .form {
+        padding:
+            8px
+            18px
+            0;
+    }
+
+    .welcome-title {
+        font-size: 26px;
+    }
+
+    .welcome-subtitle {
+        margin-bottom: 18px;
+
+        font-size: 11.5px;
+    }
+
+    .field input {
+        height: 48px;
+
+        padding-left: 44px;
+        padding-right: 44px;
+
+        font-size: 13px;
+    }
+
+    .btn {
+        min-height: 48px;
+
+        font-size: 13px;
+    }
+
+    .footer {
+        padding:
+            13px
+            18px
+            20px;
+
+        font-size: 9.5px;
+    }
+}
+
+
+/* =========================================================
+   MÓVILES MUY PEQUEÑOS
+   ========================================================= */
+
+@media (max-width: 350px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .header {
+        padding-top: 20px;
+    }
+
+    .logo-placeholder {
+        width: 68px;
+        height: 68px;
+    }
+
+    .welcome-title {
+        font-size: 24px;
+    }
+
+    .org-text {
+        font-size: 10px;
+    }
+
+    .form {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .footer {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+}
+
+
+/* =========================================================
+   ACCESIBILIDAD
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }

@@ -21,7 +21,7 @@ include_once 'app/view/layout/head.php';
         <div class="card-body">
             <div class="table-wrapper">
                 <table id="tablaMain" class="siap-table" style="width:100%">
-                    <thead><tr><th>ID</th><th>Nombre</th><th>Rol</th><th>Dependencia actual</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Dependencia actual</th><th>Estado</th><th>Acciones</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
@@ -42,6 +42,10 @@ include_once 'app/view/layout/head.php';
                 <div class="field-group">
                     <label class="field-label">Nombre</label>
                     <input type="text" id="edit_nom_rep" name="nom_rep" class="field-input" required>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Correo electrónico</label>
+                    <input type="email" id="edit_email" name="email" class="field-input" placeholder="correo@ejemplo.com" required>
                 </div>
                 <div class="field-group">
                     <label class="field-label">Contraseña (opcional)</label>

@@ -2,7 +2,8 @@
 
 
 use EquipoSiap\Siap\model\anioFiscalModel;
-require_once 'app/config/session.php';
+$this->requireLogin();
+$this->requireModule('anioFiscal');
 $object = new anioFiscalModel();
 
 if (isset($_GET['type'])) {

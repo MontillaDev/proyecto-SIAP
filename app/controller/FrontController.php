@@ -2,14 +2,22 @@
 
 namespace EquipoSiap\Siap\controller;
 
+//Carga el archivo del Trait directamente
+require_once dirname(__DIR__) . '/helpers/SessionTrait.php';
+use EquipoSiap\Siap\helpers\SessionTrait;
+
 class FrontController
 {
+    // se inyecta el Trait dentro de la clase
+    use SessionTrait;
+
     private $url;
     private $dir = __DIR__ . '/';
     private $controller = 'Controller.php';
 
     public function __construct()
     {
+        $this->startSession();
         $this->url = isset($_REQUEST['url']) && trim((string)$_REQUEST['url']) !== '' ? trim((string)$_REQUEST['url']) : '';
         $this->getUrl();
     }

@@ -26,6 +26,7 @@ class ComposerStaticInit7d3bcaff4568d3c233af3c6c5376a071
             'Psr\\Log\\' => 8,
             'Psr\\Http\\Message\\' => 17,
             'PhpOffice\\PhpSpreadsheet\\' => 25,
+            'PHPMailer\\PHPMailer\\' => 20,
         ),
         'M' =>
         array (
@@ -73,6 +74,10 @@ class ComposerStaticInit7d3bcaff4568d3c233af3c6c5376a071
         'PhpOffice\\PhpSpreadsheet\\' =>
         array (
             0 => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet',
+        ),
+        'PHPMailer\\PHPMailer\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
         'Mpdf\\PsrLogAwareTrait\\' =>
         array (

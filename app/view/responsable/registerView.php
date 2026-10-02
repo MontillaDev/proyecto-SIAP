@@ -28,6 +28,10 @@ include_once 'app/view/layout/head.php';
                     <input type="text" name="nom_rep" class="field-input" required>
                 </div>
                 <div class="field-group">
+                    <label class="field-label">Correo electrónico</label>
+                    <input type="email" name="email" class="field-input" placeholder="correo@ejemplo.com" required>
+                </div>
+                <div class="field-group">
                     <label class="field-label">Contraseña</label>
                     <input type="password" name="contrasena" class="field-input" required>
                 </div>

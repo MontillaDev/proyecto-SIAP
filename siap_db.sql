@@ -283,6 +283,20 @@ INSERT INTO `detalle_req` (`id_prod`, `id_req`, `mes`, `cant_mes`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `password_resets`
+--
+
+CREATE TABLE `password_resets` (
+  `id_reset` int(11) NOT NULL,
+  `id_responsable` int(11) NOT NULL,
+  `token` varchar(64) NOT NULL,
+  `expira_en` datetime NOT NULL,
+  `usado` tinyint(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `partidas`
 --
 
@@ -1492,6 +1506,7 @@ CREATE TABLE `responsables` (
   `id_responsable` int(11) NOT NULL,
   `id_rol` int(11) NOT NULL,
   `nom_rep` varchar(100) NOT NULL,
+  `email` varchar(150) DEFAULT NULL,
   `password` varchar(120) NOT NULL,
   `estado` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
@@ -1647,6 +1662,14 @@ ALTER TABLE `detalle_req`
   ADD KEY `id_prod` (`id_prod`);
 
 --
+-- Indices de la tabla `password_resets`
+--
+ALTER TABLE `password_resets`
+  ADD PRIMARY KEY (`id_reset`),
+  ADD UNIQUE KEY `token` (`token`),
+  ADD KEY `id_responsable` (`id_responsable`);
+
+--
 -- Indices de la tabla `partidas`
 --
 ALTER TABLE `partidas`
@@ -1687,7 +1710,8 @@ ALTER TABLE `requerimientos`
 --
 ALTER TABLE `responsables`
   ADD PRIMARY KEY (`id_responsable`),
-  ADD KEY `id_rol` (`id_rol`);
+  ADD KEY `id_rol` (`id_rol`),
+  ADD UNIQUE KEY `uq_resp_email` (`email`);
 
 --
 -- Indices de la tabla `roles`
@@ -1729,6 +1753,12 @@ ALTER TABLE `cargo`
 --
 ALTER TABLE `dependencias`
   MODIFY `id_dep` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+
+--
+-- AUTO_INCREMENT de la tabla `password_resets`
+--
+ALTER TABLE `password_resets`
+  MODIFY `id_reset` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `partidas`
@@ -1795,6 +1825,12 @@ ALTER TABLE `cargo`
 ALTER TABLE `detalle_req`
   ADD CONSTRAINT `detalle_req_ibfk_2` FOREIGN KEY (`id_req`) REFERENCES `requerimientos` (`id_req`),
   ADD CONSTRAINT `id_prod` FOREIGN KEY (`id_prod`) REFERENCES `productos` (`id_prod`);
+
+--
+-- Filtros para la tabla `password_resets`
+--
+ALTER TABLE `password_resets`
+  ADD CONSTRAINT `password_resets_ibfk_1` FOREIGN KEY (`id_responsable`) REFERENCES `responsables` (`id_responsable`);
 
 --
 -- Filtros para la tabla `periodos_entrega`

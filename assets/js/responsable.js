@@ -28,6 +28,7 @@ $(document).ready(function() {
         columns: [
             { data: 'id_responsable' },
             { data: 'nom_rep' },
+            { data: 'email', render: (d) => d ? d : '<span style="color:#999;">—</span>' },
             { data: 'rol' },
             { data: 'dependencia_actual' },
             { data: 'estado', render: (d) => Number(d) === 1 ? '<span class="badge badge-success">Activo</span>' : '<span class="badge badge-danger">Inactivo</span>' },
@@ -138,6 +139,7 @@ $(document).ready(function() {
         const data = tabla.row($(this).closest('tr')).data();
         $('#edit_idItem').val(data.id_responsable);
         $('#edit_nom_rep').val(data.nom_rep);
+        $('#edit_email').val(data.email || '');
         $('#edit_id_rol').val(data.id_rol);
         $('#edit_contrasena').val('');
         $('#modalEditar').show();

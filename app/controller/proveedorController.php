@@ -1,8 +1,9 @@
 <?php
 
     use EquipoSiap\Siap\model\proveedorModel;
+    $this->requireLogin();
+    $this->requireModule('proveedor');
     $object = new proveedorModel();
-    require_once "app/config/session.php";
 
     if (isset($_GET['type'])) {
 

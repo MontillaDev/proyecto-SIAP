@@ -1,8 +1,9 @@
 <?php
 
     use EquipoSiap\Siap\model\responsableModel;
+    $this->requireLogin();
+    $this->requireModule('responsable');
     $object = new responsableModel();
-    require_once "app/config/session.php";
 
     if (isset($_GET['type'])) {
 
@@ -17,7 +18,7 @@
             $dependenciasDisponibles = $object->getAvailableDependencias();
 
             if (isset($_POST['registerResponsable'])) {
-                if (isset($_POST['nom_rep']) && isset($_POST['contrasena']) && isset($_POST['id_rol'])) {
+                if (isset($_POST['nom_rep']) && isset($_POST['contrasena']) && isset($_POST['id_rol']) && isset($_POST['email'])) {
                     $nombre = trim($_POST['nom_rep']);
                     if ($nombre === '') {
                         header('Content-Type: application/json; charset=utf-8');
@@ -28,6 +29,19 @@
                     if ($object->existsByName($nombre)) {
                         header('Content-Type: application/json; charset=utf-8');
                         echo json_encode(['success' => false, 'message' => 'Ya existe un responsable con ese nombre.']);
+                        die();
+                    }
+                    // Validar correo electrónico
+                    $email = strtolower(trim((string)$_POST['email']));
+                    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match($object->expEmail, $email)) {
+                        header('Content-Type: application/json; charset=utf-8');
+                        echo json_encode(['success' => false, 'message' => 'El correo electrónico no es válido.']);
+                        die();
+                    }
+                    // Evitar duplicados por correo
+                    if ($object->existsByEmail($email)) {
+                        header('Content-Type: application/json; charset=utf-8');
+                        echo json_encode(['success' => false, 'message' => 'Ya existe un responsable con ese correo.']);
                         die();
                     }
                     $idDep = isset($_POST['id_dep']) ? (int)$_POST['id_dep'] : 0;
@@ -51,7 +65,8 @@
                         $nombre,
                         $_POST['contrasena'],
                         (int)$_POST['id_rol'],
-                        $idDep
+                        $idDep,
+                        $email
                     );
                     header('Content-Type: application/json; charset=utf-8');
                     echo json_encode(['success' => (bool)$result, 'message' => $result ? 'Responsable registrado exitosamente' : 'Error al registrar en la base de datos.', 'redirect' => '?url=responsable&type=main']);
@@ -76,7 +91,21 @@
                 $pass = isset($_POST['contrasena']) ? (string)$_POST['contrasena'] : null;
                 $estado = null; // estado se maneja solo desde el botón de activar/inactivar
                 $idRol = isset($_POST['id_rol']) ? (int)$_POST['id_rol'] : null;
-                $result = $object->update($id, $nom, $pass, $estado, $idRol);
+                $email = isset($_POST['email']) ? trim((string)$_POST['email']) : null;
+                if ($email !== null && $email !== '') {
+                    $email = strtolower($email);
+                    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match($object->expEmail, $email)) {
+                        header('Content-Type: application/json; charset=utf-8');
+                        echo json_encode(['success' => false, 'message' => 'El correo electrónico no es válido.']);
+                        die();
+                    }
+                    if ($object->existsByEmail($email, $id)) {
+                        header('Content-Type: application/json; charset=utf-8');
+                        echo json_encode(['success' => false, 'message' => 'Ya existe un responsable con ese correo.']);
+                        die();
+                    }
+                }
+                $result = $object->update($id, $nom, $pass, $estado, $idRol, $email);
                 header('Content-Type: application/json; charset=utf-8');
                 echo json_encode(['success' => (bool)$result, 'message' => $result ? 'Responsable actualizado' : 'Error al actualizar']);
                 die();

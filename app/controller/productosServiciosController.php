@@ -2,7 +2,8 @@
 
 use EquipoSiap\Siap\model\productosServiciosModel;
 use EquipoSiap\Siap\model\proveedorModel;
-require_once "app/config/session.php";
+$this->requireLogin();
+$this->requireModule('productosServicios');
 
 
 $object = new productosServiciosModel();

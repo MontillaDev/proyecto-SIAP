@@ -1,7 +1,8 @@
 <?php
 
 use EquipoSiap\Siap\model\reporteModel;
-require_once "app/config/session.php";
+$this->requireLogin();
+$this->requireModule('reporte');
 
 $model = new reporteModel();
 

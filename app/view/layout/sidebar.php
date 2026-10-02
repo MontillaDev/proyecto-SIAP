@@ -40,8 +40,8 @@ if (!function_exists('sidebarLink')) {
             <?php sidebarLink('reporte',             '&#128202;', 'Informes',                   $urlActual); ?>
         <?php endif; ?>
 
-        <!-- Botón Salir: destruye sesión y redirige al login -->
-        <a href="?url=logout" class="sidebar-link">
+        <!-- Botón Salir: destruye sesión y redirige al login (logout en loginDesingController) -->
+        <a href="?url=inicio&type=logout" class="sidebar-link">
             <span class="icon">&#10162;</span> <span class="sidebar-link-label">Salir</span>
         </a>
     </nav>

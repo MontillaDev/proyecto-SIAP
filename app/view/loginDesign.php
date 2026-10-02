@@ -37,6 +37,12 @@
             </div>
         <?php endif; ?>
 
+        <?php if (!empty($success)): ?>
+            <div style="color: #3c763d; background: #dff0d8; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #d6e9c6;">
+                <strong>Listo:</strong> <?php echo htmlspecialchars($success); ?>
+            </div>
+        <?php endif; ?>
+
         <!-- Se mantiene navegación sin romper tu sistema -->
         <form  method="post" autocomplete="off" id="loginForm">
             <div class="field">
@@ -75,7 +81,7 @@
         </section>
 
         <section class="footer">
-        <div>¿Olvidó su contraseña? Contacte al administrador del sistema.</div>
+        <div><a href="?url=inicio&type=recuperar" style="color:#1f6f54;">¿Olvidó su contraseña?</a> — Solicite un enlace de recuperación.</div>
         <div style="margin-top:4px;">Dirección de Planificación Presupuestaria — UPTAEB</div>
         </section>
     </main>
