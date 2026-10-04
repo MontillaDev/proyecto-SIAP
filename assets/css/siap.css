@@ -263,7 +263,6 @@ a { text-decoration: none; color: inherit; }
 }
 .btn-warning:hover { opacity: .88; }
 .btn-outline {
-  background: ;
   color: var(--text-mid);
   border-color: var(--border);
 }
@@ -767,13 +766,14 @@ table.siap-table {
 }
 .modal-panel {
   background: var(--white);
-  border-radius: var(--radius-lg);
+  border-radius: 15px;
   box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 480px;
   max-height: 90vh;
   overflow-y: auto;
   animation: modal-in .18s ease;
+
 }
 @keyframes modal-in {
   from { opacity: 0; transform: translateY(-10px) scale(.98); }
